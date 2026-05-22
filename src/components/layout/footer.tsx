@@ -5,32 +5,56 @@ import { Logo } from "@/components/shared/logo";
 
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-zinc-200 bg-zinc-950 text-zinc-200">
-      <Container className="grid gap-10 py-14 md:grid-cols-[1.2fr_0.8fr]">
-        <div className="space-y-5">
-          <Logo />
-          <p className="max-w-xl text-sm leading-7 text-zinc-400">{brand.bio}</p>
-          <p className="text-sm text-zinc-400">{brand.tagline}</p>
+    <footer className="border-t border-cyan-500/20 bg-[#060c24] text-white">
+      <Container className="py-16">
+        {/* Top Section */}
+        <div className="grid gap-12 md:grid-cols-[1.2fr_0.8fr] lg:gap-16">
+          {/* Left Column */}
+          <div className="space-y-6">
+            <Logo />
+            <div className="space-y-3">
+              <p className="max-w-lg text-sm leading-7 text-cyan-100/70">{brand.bio}</p>
+              <p className="text-sm text-cyan-100/60">{brand.tagline}</p>
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="grid gap-10 sm:grid-cols-2">
+            {/* Navigate Section */}
+            <div className="space-y-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/80">Navigate</p>
+              <div className="flex flex-col gap-2.5">
+                {footerLinks.map((item) => (
+                  <Link 
+                    key={item.href} 
+                    href={item.href} 
+                    className="text-sm text-cyan-100/70 transition hover:text-[#01c5fa]"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Contact Section */}
+            <div className="space-y-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/80">Contact</p>
+              <div className="space-y-2 text-sm text-cyan-100/70">
+                <p>{brand.supportEmail}</p>
+                <p>{brand.supportPhone}</p>
+                <p>Delivery all over Bangladesh.</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="grid gap-8 sm:grid-cols-2">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-zinc-500">Navigate</p>
-            <div className="mt-4 flex flex-col gap-3">
-              {footerLinks.map((item) => (
-                <Link key={item.href} href={item.href} className="text-sm text-zinc-300 transition hover:text-white">
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-zinc-500">Contact</p>
-            <div className="mt-4 space-y-3 text-sm text-zinc-300">
-              <p>{brand.supportEmail}</p>
-              <p>{brand.supportPhone}</p>
-              <p>Delivery all over Bangladesh.</p>
-            </div>
-          </div>
+
+        {/* Divider */}
+        <div className="my-10 border-t border-cyan-500/20" />
+
+        {/* Bottom Section */}
+        <div className="flex flex-col items-center justify-between gap-4 text-center text-xs text-cyan-100/50 md:flex-row md:text-left">
+          <p>&copy; {new Date().getFullYear()} LUMES BD. All rights reserved.</p>
+          <p>Premium Fashion for Every Style</p>
         </div>
       </Container>
     </footer>
