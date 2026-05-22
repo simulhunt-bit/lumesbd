@@ -28,8 +28,8 @@ type WishlistItem = {
 type ShopContextValue = {
   cart: CartItem[];
   wishlist: WishlistItem[];
-  addToCart: (product: Product, variant: { size: string; color: string }) => void;
-  addToWishlist: (product: Product, variant: { size: string; color: string }) => void;
+  addToCart: (product: Product, variant?: { size: string; color: string }) => void;
+  addToWishlist: (product: Product, variant?: { size: string; color: string }) => void;
   removeFromCart: (id: string) => void;
   removeFromWishlist: (id: string) => void;
   cartCount: number;
@@ -67,9 +67,12 @@ export function ShopProvider({ children }: PropsWithChildren) {
     () => ({
       cart,
       wishlist,
-      addToCart: (product, variant) =>
+      addToCart: (product, variant) => {
+        const selectedSize = variant?.size || product.sizes[0] || "";
+        const selectedColor = variant?.color || product.colors[0]?.name || "";
+        const id = buildVariantId(product.slug, selectedSize, selectedColor);
+
         setCart((current) => {
-          const id = buildVariantId(product.slug, variant.size, variant.color);
           const existing = current.find((item) => item.id === id);
           if (existing) {
             return current.map((item) =>
@@ -83,14 +86,18 @@ export function ShopProvider({ children }: PropsWithChildren) {
               id,
               slug: product.slug,
               quantity: 1,
-              size: variant.size,
-              color: variant.color,
+              size: selectedSize,
+              color: selectedColor,
             },
           ];
-        }),
-      addToWishlist: (product, variant) =>
+        });
+      },
+      addToWishlist: (product, variant) => {
+        const selectedSize = variant?.size || product.sizes[0] || "";
+        const selectedColor = variant?.color || product.colors[0]?.name || "";
+        const id = buildVariantId(product.slug, selectedSize, selectedColor);
+
         setWishlist((current) => {
-          const id = buildVariantId(product.slug, variant.size, variant.color);
           if (current.some((item) => item.id === id)) {
             return current;
           }
@@ -100,11 +107,12 @@ export function ShopProvider({ children }: PropsWithChildren) {
             {
               id,
               slug: product.slug,
-              size: variant.size,
-              color: variant.color,
+              size: selectedSize,
+              color: selectedColor,
             },
           ];
-        }),
+        });
+      },
       removeFromCart: (id) => setCart((current) => current.filter((item) => item.id !== id)),
       removeFromWishlist: (id) => setWishlist((current) => current.filter((item) => item.id !== id)),
       cartCount: cart.reduce((sum, item) => sum + item.quantity, 0),
