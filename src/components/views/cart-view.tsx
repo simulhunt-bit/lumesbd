@@ -8,9 +8,17 @@ import { useAuth } from "@/context/auth-context";
 import { getProducts } from "@/lib/catalog";
 import { formatPrice, districtDeliveryCharge } from "@/lib/utils";
 
-type CartProduct = {
-  product: ReturnType<typeof getProducts>[number];
+type CartItem = {
+  id: string;
+  slug: string;
   quantity: number;
+  size: string;
+  color: string;
+};
+
+type CartProduct = {
+  item: CartItem;
+  product: ReturnType<typeof getProducts>[number];
 };
 
 export function CartView() {
@@ -19,11 +27,11 @@ export function CartView() {
   const cartProducts = cart
     .map((item) => {
       const product = getProducts().find((entry) => entry.slug === item.slug);
-      return product ? { product, quantity: item.quantity } : null;
+      return product ? { item, product } : null;
     })
     .filter(Boolean) as CartProduct[];
 
-  const total = cartProducts.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const total = cartProducts.reduce((sum, entry) => sum + entry.product.price * entry.item.quantity, 0);
 
   const savedDistricts = profile?.addresses
     .map((address) => address.district.trim())
@@ -59,20 +67,24 @@ export function CartView() {
       {cartProducts.length > 0 ? (
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
           <div className="space-y-4">
-            {cartProducts.map(({ product, quantity }) => (
-              <article key={product.slug} className="grid gap-4 rounded-[2rem] border border-zinc-200 bg-white p-4 sm:grid-cols-[160px_1fr]">
+            {cartProducts.map(({ item, product }) => (
+              <article key={item.id} className="grid gap-4 rounded-[2rem] border border-zinc-200 bg-white p-4 sm:grid-cols-[160px_1fr]">
                 <div className="relative aspect-[4/4.2] overflow-hidden rounded-[1.4rem] bg-zinc-50">
                   <Image src={product.images[0]} alt={product.name} fill className="object-cover" sizes="160px" />
                 </div>
                 <div className="flex flex-col justify-between gap-4">
                   <div>
                     <h2 className="text-xl font-semibold text-zinc-950">{product.name}</h2>
-                    <p className="mt-2 text-sm text-zinc-600">Quantity: {quantity}</p>
+                    <div className="mt-2 flex flex-wrap gap-2 text-sm text-zinc-600">
+                      <span>Size: {item.size}</span>
+                      <span>Color: {item.color}</span>
+                    </div>
+                    <p className="mt-2 text-sm text-zinc-600">Quantity: {item.quantity}</p>
                     <p className="mt-2 text-sm text-zinc-600">Stock: {product.stock > 0 ? `${product.stock} available` : "Out of stock"}</p>
                   </div>
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-lg font-semibold text-zinc-950">{formatPrice(product.price * quantity)}</p>
-                    <button type="button" onClick={() => removeFromCart(product.slug)} className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-900">
+                    <p className="text-lg font-semibold text-zinc-950">{formatPrice(product.price * item.quantity)}</p>
+                    <button type="button" onClick={() => removeFromCart(item.id)} className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-900">
                       Remove
                     </button>
                   </div>

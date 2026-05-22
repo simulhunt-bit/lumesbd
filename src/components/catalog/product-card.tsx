@@ -9,10 +9,17 @@ import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/catalog";
 import { ProductModal } from "./product-modal";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  variant,
+}: {
+  product: Product;
+  variant?: { size: string; color: string };
+}) {
   const { addToWishlist, removeFromWishlist, wishlist } = useShop();
   const [open, setOpen] = useState(false);
-  const isSaved = wishlist.includes(product.slug);
+  const savedItem = wishlist.find((item) => item.slug === product.slug);
+  const isSaved = Boolean(savedItem);
 
   return (
     <>
@@ -22,7 +29,16 @@ export function ProductCard({ product }: { product: Product }) {
           <button
             type="button"
             className="absolute right-4 top-4 rounded-full bg-white/90 p-3 text-zinc-700 shadow-sm backdrop-blur transition hover:text-zinc-950"
-            onClick={() => (isSaved ? removeFromWishlist(product.slug) : addToWishlist(product.slug))}
+            onClick={() => {
+              if (isSaved && savedItem) {
+                removeFromWishlist(savedItem.id);
+              } else {
+                addToWishlist(product, {
+                  size: product.sizes[0] ?? "",
+                  color: product.colors[0]?.name ?? "",
+                });
+              }
+            }}
             aria-label={isSaved ? "Remove from wishlist" : "Add to wishlist"}
           >
             <Heart className={`h-4 w-4 ${isSaved ? "fill-current text-rose-500" : ""}`} />
@@ -36,6 +52,12 @@ export function ProductCard({ product }: { product: Product }) {
               <Link href={`/products/${product.slug}`} className="mt-2 block text-lg font-semibold text-zinc-950 transition hover:text-orange-600">
                 {product.name}
               </Link>
+              {variant ? (
+                <div className="mt-2 flex flex-wrap gap-2 text-sm text-zinc-600">
+                  <span className="rounded-full border border-zinc-200 px-3 py-1">Size: {variant.size}</span>
+                  <span className="rounded-full border border-zinc-200 px-3 py-1">Color: {variant.color}</span>
+                </div>
+              ) : null}
             </div>
             <div className="text-right">
               <p className="text-lg font-semibold text-zinc-950">{formatPrice(product.price)}</p>

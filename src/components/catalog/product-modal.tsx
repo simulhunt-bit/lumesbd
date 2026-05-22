@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useShop } from "@/context/shop-context";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/catalog";
@@ -18,9 +18,14 @@ export function ProductModal({
   onClose: () => void;
 }) {
   const { addToCart, addToWishlist } = useShop();
+  const [selectedSize, setSelectedSize] = useState(product?.sizes[0] ?? "");
+  const [selectedColor, setSelectedColor] = useState(product?.colors[0]?.name ?? "");
 
   useEffect(() => {
     if (!open) return;
+
+    setSelectedSize(product?.sizes[0] ?? "");
+    setSelectedColor(product?.colors[0]?.name ?? "");
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
@@ -28,7 +33,7 @@ export function ProductModal({
 
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, [open, onClose]);
+  }, [open, onClose, product]);
 
   if (!open || !product) return null;
 
@@ -58,23 +63,41 @@ export function ProductModal({
               {inStock ? `${product.stock} in stock` : "Out of stock"}
             </p>
             <div className="mt-5">
-              <p className="text-sm font-medium text-zinc-950">Available sizes</p>
+              <p className="text-sm font-medium text-zinc-950">Choose size</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {product.sizes.map((size) => (
-                  <span key={size} className="rounded-full border border-zinc-200 px-3 py-2 text-sm text-zinc-700">
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => setSelectedSize(size)}
+                    className={`rounded-full border px-3 py-2 text-sm font-medium transition ${
+                      selectedSize === size
+                        ? "border-zinc-950 bg-zinc-950 text-white"
+                        : "border-zinc-200 text-zinc-700 hover:border-zinc-950"
+                    }`}
+                  >
                     {size}
-                  </span>
+                  </button>
                 ))}
               </div>
             </div>
             <div className="mt-5">
-              <p className="text-sm font-medium text-zinc-950">Available colors</p>
+              <p className="text-sm font-medium text-zinc-950">Choose color</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {product.colors.map((color) => (
-                  <span key={color.name} className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-3 py-2 text-sm text-zinc-700">
+                  <button
+                    key={color.name}
+                    type="button"
+                    onClick={() => setSelectedColor(color.name)}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition ${
+                      selectedColor === color.name
+                        ? "border-zinc-950 bg-zinc-950 text-white"
+                        : "border-zinc-200 text-zinc-700 hover:border-zinc-950"
+                    }`}
+                  >
                     <span className="h-4 w-4 rounded-full border border-zinc-200" style={{ backgroundColor: color.hex }} />
                     {color.name}
-                  </span>
+                  </button>
                 ))}
               </div>
             </div>
@@ -84,7 +107,10 @@ export function ProductModal({
                 <>
                   <button
                     type="button"
-                    onClick={() => addToCart(product)}
+                    onClick={() => {
+                      addToCart(product, { size: selectedSize, color: selectedColor });
+                      onClose();
+                    }}
                     className="rounded-full border border-zinc-200 px-5 py-3 text-sm font-medium text-zinc-900 transition hover:border-zinc-300"
                   >
                     Add to Cart
@@ -96,7 +122,10 @@ export function ProductModal({
               ) : (
                 <button
                   type="button"
-                  onClick={() => addToWishlist(product.slug)}
+                  onClick={() => {
+                    addToWishlist(product, { size: selectedSize, color: selectedColor });
+                    onClose();
+                  }}
                   className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 sm:col-span-2"
                 >
                   Add to Wishlist

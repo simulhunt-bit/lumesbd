@@ -11,17 +11,27 @@ import {
 import type { Product } from "@/types/catalog";
 
 type CartItem = {
+  id: string;
   slug: string;
   quantity: number;
+  size: string;
+  color: string;
+};
+
+type WishlistItem = {
+  id: string;
+  slug: string;
+  size: string;
+  color: string;
 };
 
 type ShopContextValue = {
   cart: CartItem[];
-  wishlist: string[];
-  addToCart: (product: Product) => void;
-  addToWishlist: (slug: string) => void;
-  removeFromCart: (slug: string) => void;
-  removeFromWishlist: (slug: string) => void;
+  wishlist: WishlistItem[];
+  addToCart: (product: Product, variant: { size: string; color: string }) => void;
+  addToWishlist: (product: Product, variant: { size: string; color: string }) => void;
+  removeFromCart: (id: string) => void;
+  removeFromWishlist: (id: string) => void;
   cartCount: number;
   wishlistCount: number;
 };
@@ -31,13 +41,15 @@ const ShopContext = createContext<ShopContextValue | null>(null);
 const CART_KEY = "lumes-cart";
 const WISHLIST_KEY = "lumes-wishlist";
 
+const buildVariantId = (slug: string, size: string, color: string) => `${slug}|${size}|${color}`;
+
 export function ShopProvider({ children }: PropsWithChildren) {
   const [cart, setCart] = useState<CartItem[]>(() => {
     if (typeof window === "undefined") return [];
     const storedCart = window.localStorage.getItem(CART_KEY);
     return storedCart ? JSON.parse(storedCart) : [];
   });
-  const [wishlist, setWishlist] = useState<string[]>(() => {
+  const [wishlist, setWishlist] = useState<WishlistItem[]>(() => {
     if (typeof window === "undefined") return [];
     const storedWishlist = window.localStorage.getItem(WISHLIST_KEY);
     return storedWishlist ? JSON.parse(storedWishlist) : [];
@@ -55,22 +67,46 @@ export function ShopProvider({ children }: PropsWithChildren) {
     () => ({
       cart,
       wishlist,
-      addToCart: (product) =>
+      addToCart: (product, variant) =>
         setCart((current) => {
-          const existing = current.find((item) => item.slug === product.slug);
+          const id = buildVariantId(product.slug, variant.size, variant.color);
+          const existing = current.find((item) => item.id === id);
           if (existing) {
             return current.map((item) =>
-              item.slug === product.slug ? { ...item, quantity: item.quantity + 1 } : item,
+              item.id === id ? { ...item, quantity: item.quantity + 1 } : item,
             );
           }
 
-          return [...current, { slug: product.slug, quantity: 1 }];
+          return [
+            ...current,
+            {
+              id,
+              slug: product.slug,
+              quantity: 1,
+              size: variant.size,
+              color: variant.color,
+            },
+          ];
         }),
-      addToWishlist: (slug) =>
-        setWishlist((current) => (current.includes(slug) ? current : [...current, slug])),
-      removeFromCart: (slug) => setCart((current) => current.filter((item) => item.slug !== slug)),
-      removeFromWishlist: (slug) =>
-        setWishlist((current) => current.filter((item) => item !== slug)),
+      addToWishlist: (product, variant) =>
+        setWishlist((current) => {
+          const id = buildVariantId(product.slug, variant.size, variant.color);
+          if (current.some((item) => item.id === id)) {
+            return current;
+          }
+
+          return [
+            ...current,
+            {
+              id,
+              slug: product.slug,
+              size: variant.size,
+              color: variant.color,
+            },
+          ];
+        }),
+      removeFromCart: (id) => setCart((current) => current.filter((item) => item.id !== id)),
+      removeFromWishlist: (id) => setWishlist((current) => current.filter((item) => item.id !== id)),
       cartCount: cart.reduce((sum, item) => sum + item.quantity, 0),
       wishlistCount: wishlist.length,
     }),
