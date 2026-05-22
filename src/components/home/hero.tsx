@@ -31,7 +31,6 @@ export function Hero() {
             {[
               ["Nationwide", "Bangladesh Delivery"],
               ["Premium", "Quality & Comfort"],
-              ["Static-Ready", "Fast GitHub Hosting"],
             ].map(([value, label]) => (
               <div key={label} className="rounded-3xl border border-white/80 bg-white/80 p-3.5 shadow-[0_18px_40px_-30px_rgba(24,24,27,0.6)] backdrop-blur sm:p-4">
                 <p className="text-base font-semibold text-zinc-950 sm:text-lg">{value}</p>
