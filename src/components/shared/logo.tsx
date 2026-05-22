@@ -3,15 +3,18 @@ import Image from "next/image";
 
 export function Logo() {
   return (
-    <Link href="/" className="inline-flex items-center gap-3">
-      <Image
-        src="/lumes-logo.png"
-        alt="LUMES BD Logo"
-        width={120}
-        height={40}
-        priority
-        className="h-auto w-auto"
-      />
+    <Link href="/" className="inline-flex items-center">
+      <div className="relative h-12 w-auto sm:h-14 lg:h-16">
+        <Image
+          src="/lumes-logo.png"
+          alt="LUMES BD Logo"
+          width={200}
+          height={60}
+          priority
+          quality={90}
+          className="h-full w-auto object-contain"
+        />
+      </div>
     </Link>
   );
 }
