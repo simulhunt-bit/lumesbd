@@ -6,43 +6,49 @@ import { useAuth } from "@/context/auth-context";
 export function LoginPanel() {
   const { authEnabled, loginWithGoogle } = useAuth();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleGoogle = async () => {
     try {
-      await loginWithGoogle();
+      setLoading(true);
       setError("");
+      await loginWithGoogle();
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Could not log in with Google.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="grid gap-6 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-[0_24px_70px_-48px_rgba(24,24,27,0.35)] lg:grid-cols-2 lg:p-8">
-      <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.28em] text-orange-600">Access</p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-zinc-950">Login to your LUMES account</h1>
-        <p className="mt-4 text-base leading-8 text-zinc-600">
+    <div className="grid gap-8 rounded-2xl border border-cyan-500/20 bg-[#0a1428] p-6 shadow-[0_24px_70px_-48px_rgba(1,197,250,0.2)] lg:grid-cols-2 lg:p-10">
+      <div className="space-y-6">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/80">Access</p>
+          <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">Login to your<br />LUMES account</h1>
+        </div>
+        <p className="max-w-sm text-sm leading-7 text-cyan-100/70">
           Google login is wired for Firebase Authentication and is the only enabled account access method for this storefront.
         </p>
         {!authEnabled && (
-          <div className="mt-5 rounded-[1.4rem] border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-800">
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm leading-7 text-amber-200">
             Firebase environment variables are not configured yet. The UI is ready, but authentication will stay disabled until you add your keys.
           </div>
         )}
       </div>
-      <div className="space-y-4 rounded-[1.5rem] border border-zinc-200 p-4 sm:p-5">
-        <p className="text-sm leading-7 text-zinc-600">
+      <div className="space-y-5 rounded-xl border border-cyan-500/20 bg-[#060c24] p-6 sm:p-8">
+        <p className="text-sm leading-7 text-cyan-100/70">
           Continue with your Google account to access your saved profile, delivery addresses, wishlist, and order-ready checkout details.
         </p>
         <button
           type="button"
-          disabled={!authEnabled}
+          disabled={!authEnabled || loading}
           onClick={handleGoogle}
-          className="w-full rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-zinc-300"
+          className="w-full rounded-full border border-cyan-400/20 bg-transparent px-5 py-3 text-sm font-medium text-cyan-100/78 transition enabled:hover:border-cyan-400/50 enabled:hover:text-[#01c5fa] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Continue with Google
+          {loading ? "Signing in..." : "Continue with Google"}
         </button>
-        {error && <p className="text-sm text-rose-700">{error}</p>}
+        {error && <p className="text-sm leading-6 text-rose-400">{error}</p>}
       </div>
     </div>
   );
