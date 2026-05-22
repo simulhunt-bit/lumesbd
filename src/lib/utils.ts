@@ -24,3 +24,12 @@ export const districtDeliveryCharge = (district?: string) => {
 
   return 180;
 };
+
+export const VAT_CHARGE = 20;
+
+export const deliveryChargeForWeight = (district?: string, itemCount = 0) => {
+  if (!district?.trim() || itemCount <= 0) return 0;
+  const baseCharge = districtDeliveryCharge(district);
+  const packageCount = Math.max(1, Math.ceil(itemCount / 3));
+  return baseCharge * packageCount;
+};

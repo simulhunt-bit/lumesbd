@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useShop } from "@/context/shop-context";
 import { useAuth } from "@/context/auth-context";
 import { getProducts } from "@/lib/catalog";
-import { formatPrice, districtDeliveryCharge } from "@/lib/utils";
+import { formatPrice, deliveryChargeForWeight, VAT_CHARGE } from "@/lib/utils";
 
 type CartItem = {
   id: string;
@@ -32,6 +32,7 @@ export function CartView() {
     .filter(Boolean) as CartProduct[];
 
   const total = cartProducts.reduce((sum, entry) => sum + entry.product.price * entry.item.quantity, 0);
+  const totalItems = cartProducts.reduce((sum, entry) => sum + entry.item.quantity, 0);
 
   const savedDistricts = profile?.addresses
     .map((address) => address.district.trim())
@@ -56,7 +57,10 @@ export function CartView() {
       ? uniqueDistricts
       : ["Dhaka", "Chattogram", "Rajshahi", "Sylhet", "Khulna", "Barishal", "Mymensingh", "Rangpur"];
 
-  const deliveryCharge = districtDeliveryCharge(selectedDistrict);
+  const deliveryCharge = deliveryChargeForWeight(selectedDistrict, totalItems);
+  const vatCharge = VAT_CHARGE;
+  const grandTotal = total + deliveryCharge + vatCharge;
+  const deliveryWeightText = `${Math.max(1, Math.ceil(totalItems / 3))}KG`; 
 
   return (
     <div className="space-y-6">
@@ -118,14 +122,22 @@ export function CartView() {
               <span>{selectedDistrict ? formatPrice(deliveryCharge) : "Choose district"}</span>
             </div>
             <div className="mt-3 flex items-center justify-between text-sm text-zinc-600">
+              <span>Delivery weight</span>
+              <span>{selectedDistrict ? deliveryWeightText : "Choose district"}</span>
+            </div>
+            <div className="mt-3 flex items-center justify-between text-sm text-zinc-600">
+              <span>VAT</span>
+              <span>{formatPrice(vatCharge)}</span>
+            </div>
+            <div className="mt-3 flex items-center justify-between text-sm text-zinc-600">
               <span>Total</span>
-              <span>{formatPrice(total + deliveryCharge)}</span>
+              <span>{formatPrice(grandTotal)}</span>
             </div>
             <p className="mt-4 text-xs italic text-zinc-500">
-              Delivery charge updates automatically when you select your district.
+              Same address delivery: up to 3 pcs counts as 1KG. More items increase the shipment weight and delivery cost.
             </p>
             <div className="mt-6 border-t border-zinc-200 pt-6">
-              <p className="text-xl font-semibold text-zinc-950">{formatPrice(total + deliveryCharge)}</p>
+              <p className="text-xl font-semibold text-zinc-950">{formatPrice(grandTotal)}</p>
               <Link href="/dashboard" className="mt-4 inline-flex w-full justify-center rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white">
                 Continue to Checkout Setup
               </Link>
