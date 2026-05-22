@@ -2,7 +2,6 @@ import type { NavItem } from "@/types/catalog";
 
 export const brand = {
   name: "LUMES BD",
-  bengaliName: "লুমেস",
   tagline: "Light Up Your Style",
   bio: "Premium Jerseys & Modern Fashion Wear for Men & Women. Quality, Comfort, Trend. Delivery all over Bangladesh.",
   supportEmail: "hello@lumesbd.com",

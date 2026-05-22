@@ -15,7 +15,6 @@ export function Hero() {
           </div>
           <h1 className="mt-5 text-4xl font-semibold tracking-tight text-zinc-950 sm:mt-6 sm:text-6xl lg:text-7xl">
             {brand.name}
-            <span className="font-bengali mt-3 block text-xl font-medium tracking-[0.12em] text-zinc-500 sm:text-3xl sm:tracking-[0.16em]">{brand.bengaliName}</span>
           </h1>
           <p className="mt-5 max-w-xl text-base leading-7 text-zinc-600 sm:mt-6 sm:text-lg sm:leading-8">{brand.bio}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
