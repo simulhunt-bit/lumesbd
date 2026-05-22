@@ -10,8 +10,9 @@ import type { Product } from "@/types/catalog";
 import { ProductModal } from "./product-modal";
 
 export function ProductCard({ product }: { product: Product }) {
-  const { addToWishlist, wishlist } = useShop();
+  const { addToWishlist, removeFromWishlist, wishlist } = useShop();
   const [open, setOpen] = useState(false);
+  const isSaved = wishlist.includes(product.slug);
 
   return (
     <>
@@ -21,10 +22,10 @@ export function ProductCard({ product }: { product: Product }) {
           <button
             type="button"
             className="absolute right-4 top-4 rounded-full bg-white/90 p-3 text-zinc-700 shadow-sm backdrop-blur transition hover:text-zinc-950"
-            onClick={() => addToWishlist(product.slug)}
-            aria-label="Add to wishlist"
+            onClick={() => (isSaved ? removeFromWishlist(product.slug) : addToWishlist(product.slug))}
+            aria-label={isSaved ? "Remove from wishlist" : "Add to wishlist"}
           >
-            <Heart className={`h-4 w-4 ${wishlist.includes(product.slug) ? "fill-current text-rose-500" : ""}`} />
+            <Heart className={`h-4 w-4 ${isSaved ? "fill-current text-rose-500" : ""}`} />
           </button>
           {product.badge && <span className="absolute left-4 top-4 rounded-full bg-zinc-950 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white">{product.badge}</span>}
         </div>
