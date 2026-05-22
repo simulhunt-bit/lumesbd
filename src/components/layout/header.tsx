@@ -37,7 +37,7 @@ export function Header() {
           </Link>
           <Link
             href={user ? "/dashboard" : "/login"}
-            className="inline-flex items-center gap-2 rounded-full bg-[#01c5fa] px-5 py-3 text-sm font-medium text-[#060c24] transition hover:bg-cyan-300"
+            className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 px-5 py-3 text-sm font-medium text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa]"
           >
             <User2 className="h-4 w-4" />
             {user ? "Dashboard" : "Login"}
@@ -66,7 +66,7 @@ export function Header() {
             <Link href="/cart" className="rounded-full border border-cyan-400/20 p-3 text-cyan-100/78">
               <ShoppingBag className="h-5 w-5" />
             </Link>
-            <Link href={user ? "/dashboard" : "/login"} className="flex-1 rounded-full bg-[#01c5fa] px-5 py-3 text-center text-sm font-medium text-[#060c24]">
+            <Link href={user ? "/dashboard" : "/login"} className="flex-1 rounded-full border border-cyan-400/20 px-5 py-3 text-center text-sm font-medium text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa]">
               {user ? "Dashboard" : "Login"}
             </Link>
           </div>
