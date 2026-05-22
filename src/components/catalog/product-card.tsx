@@ -1,0 +1,58 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { Heart } from "lucide-react";
+import { useState } from "react";
+import { useShop } from "@/context/shop-context";
+import { formatPrice } from "@/lib/utils";
+import type { Product } from "@/types/catalog";
+import { ProductModal } from "./product-modal";
+
+export function ProductCard({ product }: { product: Product }) {
+  const { addToWishlist, wishlist } = useShop();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <article className="group overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-[0_24px_60px_-48px_rgba(24,24,27,0.65)] transition hover:-translate-y-1 hover:shadow-[0_32px_70px_-42px_rgba(24,24,27,0.36)]">
+        <div className="relative aspect-[4/4.6] overflow-hidden bg-[linear-gradient(180deg,_#fff7ed,_#f8fafc)]">
+          <Image src={product.images[0]} alt={product.name} fill className="object-cover transition duration-500 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 25vw" />
+          <button
+            type="button"
+            className="absolute right-4 top-4 rounded-full bg-white/90 p-3 text-zinc-700 shadow-sm backdrop-blur transition hover:text-zinc-950"
+            onClick={() => addToWishlist(product.slug)}
+            aria-label="Add to wishlist"
+          >
+            <Heart className={`h-4 w-4 ${wishlist.includes(product.slug) ? "fill-current text-rose-500" : ""}`} />
+          </button>
+          {product.badge && <span className="absolute left-4 top-4 rounded-full bg-zinc-950 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white">{product.badge}</span>}
+        </div>
+        <div className="space-y-4 p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">{product.subcategorySlug.replaceAll("-", " ")}</p>
+              <Link href={`/products/${product.slug}`} className="mt-2 block text-lg font-semibold text-zinc-950 transition hover:text-orange-600">
+                {product.name}
+              </Link>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-semibold text-zinc-950">{formatPrice(product.price)}</p>
+              {product.compareAtPrice && <p className="text-xs text-zinc-400 line-through">{formatPrice(product.compareAtPrice)}</p>}
+            </div>
+          </div>
+          <p className="text-sm leading-7 text-zinc-600">{product.description}</p>
+          <div className="flex items-center justify-between gap-3">
+            <p className={`text-xs font-semibold uppercase tracking-[0.18em] ${product.stock > 0 ? "text-emerald-700" : "text-rose-700"}`}>
+              {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+            </p>
+            <button type="button" onClick={() => setOpen(true)} className="rounded-full bg-zinc-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800">
+              Buy Now
+            </button>
+          </div>
+        </div>
+      </article>
+      <ProductModal product={product} open={open} onClose={() => setOpen(false)} />
+    </>
+  );
+}

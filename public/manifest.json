@@ -1,0 +1,39 @@
+{
+  "name": "LUMES BD - Light Up Your Style",
+  "short_name": "LUMES BD",
+  "description": "Premium Jerseys & Modern Fashion Wear for Men & Women. Quality, Comfort, Trend. Delivery all over Bangladesh.",
+  "start_url": "https://lumesbd.shop",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#060c24",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "type": "image/png",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/lumes-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/lumes-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["shopping", "e-commerce"],
+  "screenshots": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

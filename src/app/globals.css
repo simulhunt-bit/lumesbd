@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+:root {
+  --font-sans: "Manrope", sans-serif;
+  --font-bengali: "Noto Sans Bengali", sans-serif;
+  --bg: #060c24;
+  --surface: #0d1535;
+  --foreground: #f8fbff;
+  --accent: #01c5fa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--foreground);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--accent);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.font-bengali {
+  font-family: var(--font-bengali);
+}
