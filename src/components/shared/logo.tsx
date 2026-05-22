@@ -1,20 +1,13 @@
 import Link from "next/link";
-import Image from "next/image";
 
 export function Logo() {
   return (
-    <Link href="/" className="inline-flex items-center">
-      <div className="relative h-12 w-auto sm:h-14 lg:h-16">
-        <Image
-          src="/lumes-logo.png"
-          alt="LUMES BD Logo"
-          width={200}
-          height={60}
-          priority
-          quality={90}
-          className="h-full w-auto object-contain"
-        />
-      </div>
+    <Link 
+      href="/" 
+      className="inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 p-2 transition hover:shadow-lg hover:shadow-cyan-500/50 sm:p-2.5"
+      title="LUMES BD"
+    >
+      <span className="text-lg font-bold text-white sm:text-xl">LB</span>
     </Link>
   );
 }
