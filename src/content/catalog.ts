@@ -139,7 +139,7 @@ export const products: Product[] = [
     subcategorySlug: "world-cup-2026",
     price: 500,
     compareAtPrice: 550,
-    stock: 0,
+    stock: 10,
     gender: "Unisex",
     isNew: true,
     description: "A sleek away design for supporters who want a cooler palette and premium cut.",
