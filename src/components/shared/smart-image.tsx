@@ -10,6 +10,7 @@ type SmartImageProps = Omit<ImageProps, "src"> & {
 };
 
 const LOGO_FALLBACK = "/lumes-image-placeholder.png";
+const MIN_PLACEHOLDER_MS = 850;
 
 export function SmartImage({ src, alt, className, imageClassName, onLoad, onError, ...props }: SmartImageProps) {
   return (
@@ -49,12 +50,15 @@ function SmartImageRenderer({ src, alt, className, imageClassName, onLoad, onErr
           revealed && !failed ? "translate-y-2 opacity-0" : "translate-y-0 opacity-100",
         )}
       >
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={LOGO_FALLBACK}
           alt="LUMES BD"
-          width={220}
-          height={173}
-          className="h-auto w-28 opacity-90 drop-shadow-[0_18px_45px_rgba(1,197,250,0.18)] sm:w-36"
+          width={640}
+          height={502}
+          loading="eager"
+          decoding="sync"
+          className="h-auto w-[42%] min-w-28 max-w-44 opacity-95 drop-shadow-[0_18px_45px_rgba(1,197,250,0.24)]"
         />
       </div>
       {src && !failed ? (
@@ -64,7 +68,7 @@ function SmartImageRenderer({ src, alt, className, imageClassName, onLoad, onErr
           alt={alt}
           onLoad={(event) => {
             setReady(true);
-            revealTimer.current = setTimeout(() => setRevealed(true), 180);
+            revealTimer.current = setTimeout(() => setRevealed(true), MIN_PLACEHOLDER_MS);
             onLoad?.(event);
           }}
           onError={(event) => {
@@ -75,7 +79,7 @@ function SmartImageRenderer({ src, alt, className, imageClassName, onLoad, onErr
           }}
           className={cn(
             "relative z-0 transition duration-700 ease-out",
-            ready ? "translate-y-0 opacity-100" : "-translate-y-3 opacity-0",
+            ready && revealed ? "translate-y-0 opacity-100" : "-translate-y-3 opacity-0",
             imageClassName,
           )}
         />
