@@ -32,6 +32,7 @@ type ShopContextValue = {
   addToWishlist: (product: Product, variant?: { size: string; color: string }) => void;
   updateCartQuantity: (id: string, quantity: number, maxQuantity?: number) => void;
   removeFromCart: (id: string) => void;
+  clearCart: () => void;
   removeFromWishlist: (id: string) => void;
   cartCount: number;
   wishlistCount: number;
@@ -124,6 +125,7 @@ export function ShopProvider({ children }: PropsWithChildren) {
         );
       },
       removeFromCart: (id) => setCart((current) => current.filter((item) => item.id !== id)),
+      clearCart: () => setCart([]),
       removeFromWishlist: (id) => setWishlist((current) => current.filter((item) => item.id !== id)),
       cartCount: cart.reduce((sum, item) => sum + item.quantity, 0),
       wishlistCount: wishlist.length,

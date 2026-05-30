@@ -1,0 +1,70 @@
+import { NextResponse } from "next/server";
+import crypto from "node:crypto";
+import { sendAdminOrderEmail } from "@/lib/email";
+import { getProducts } from "@/lib/catalog";
+import { deliveryChargeForWeight, VAT_CHARGE } from "@/lib/utils";
+import { COD_PAYMENT_METHOD, type CheckoutOrder, validateCheckoutOrder } from "@/lib/orders";
+
+export async function POST(req: Request) {
+  try {
+    const order = (await req.json()) as CheckoutOrder;
+    const products = getProducts();
+    const items = order.items.map((item) => {
+      const product = products.find((entry) => entry.slug === item.productSlug);
+
+      if (!product) {
+        throw new Error(`Product ${item.productName || item.productSlug} is not available.`);
+      }
+
+      if (!product.sizes.includes(item.size as (typeof product.sizes)[number])) {
+        throw new Error(`${product.name} is not available in size ${item.size}.`);
+      }
+
+      if (!product.colors.some((color) => color.name === item.color)) {
+        throw new Error(`${product.name} is not available in color ${item.color}.`);
+      }
+
+      const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
+
+      if (quantity > product.stock) {
+        throw new Error(`${product.name} has only ${product.stock} available.`);
+      }
+
+      return {
+        productSlug: product.slug,
+        productName: product.name,
+        size: item.size,
+        color: item.color,
+        quantity,
+        unitPrice: product.price,
+        lineTotal: product.price * quantity,
+      };
+    });
+    const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
+    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+    const deliveryCharge = deliveryChargeForWeight(order.district, totalItems);
+    const normalizedOrder: CheckoutOrder = {
+      ...order,
+      orderId: `LUMES-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+      items,
+      subtotal,
+      deliveryCharge,
+      vat: VAT_CHARGE,
+      grandTotal: subtotal + deliveryCharge + VAT_CHARGE,
+      createdAt: new Date().toISOString(),
+      paymentMethod: COD_PAYMENT_METHOD,
+    };
+
+    validateCheckoutOrder(normalizedOrder);
+    await sendAdminOrderEmail(normalizedOrder, new URL(req.url).origin);
+
+    return NextResponse.json({ success: true, orderId: normalizedOrder.orderId });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Could not place order.",
+      },
+      { status: 400 },
+    );
+  }
+}

@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useShop } from "@/context/shop-context";
 import { useAuth } from "@/context/auth-context";
 import { getProducts } from "@/lib/catalog";
 import { formatPrice, deliveryChargeForWeight, VAT_CHARGE } from "@/lib/utils";
+import { COD_PAYMENT_METHOD, type CheckoutOrder } from "@/lib/orders";
 
 type CartItem = {
   id: string;
@@ -22,8 +23,19 @@ type CartProduct = {
 };
 
 export function CartView() {
-  const { cart, removeFromCart, updateCartQuantity } = useShop();
+  const { cart, clearCart, removeFromCart, updateCartQuantity } = useShop();
   const { profile } = useAuth();
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [checkoutDetails, setCheckoutDetails] = useState({
+    customerName: "",
+    customerPhone: "",
+    customerEmail: "",
+    deliveryAddress: "",
+    district: "",
+    thana: "",
+  });
+  const [orderStatus, setOrderStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [orderMessage, setOrderMessage] = useState("");
   const cartProducts = cart
     .map((item) => {
       const product = getProducts().find((entry) => entry.slug === item.slug);
@@ -36,11 +48,20 @@ export function CartView() {
 
   const savedAddresses = profile?.addresses.filter((address) => address.district.trim()) ?? [];
   const defaultAddress = savedAddresses.find((address) => address.isDefault) ?? savedAddresses[0];
-  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const selectedAddress =
     savedAddresses.find((address) => address.id === selectedAddressId) ??
     defaultAddress;
-  const selectedDistrict = selectedAddress?.district.trim() ?? "";
+  const activeCheckoutDetails = {
+    customerName:
+      checkoutDetails.customerName || selectedAddress?.fullName || profile?.displayName || "",
+    customerPhone:
+      checkoutDetails.customerPhone || selectedAddress?.phoneNumber || profile?.phoneNumber || "",
+    customerEmail: checkoutDetails.customerEmail || selectedAddress?.gmail || profile?.email || "",
+    deliveryAddress: checkoutDetails.deliveryAddress || selectedAddress?.fullAddress || "",
+    district: checkoutDetails.district || selectedAddress?.district || "",
+    thana: checkoutDetails.thana || selectedAddress?.thana || "",
+  };
+  const selectedDistrict = activeCheckoutDetails.district.trim();
 
   const addressLabel = (address: typeof savedAddresses[number]) =>
     [address.fullName, address.district, address.thana].filter(Boolean).join(" - ");
@@ -48,7 +69,73 @@ export function CartView() {
   const deliveryCharge = deliveryChargeForWeight(selectedDistrict, totalItems);
   const vatCharge = VAT_CHARGE;
   const grandTotal = total + deliveryCharge + vatCharge;
-  const deliveryWeightText = `${Math.max(1, Math.ceil(totalItems / 3))}KG`; 
+  const deliveryWeightText = `${Math.max(1, Math.ceil(totalItems / 3))}KG`;
+  const canSubmitOrder =
+    cartProducts.length > 0 &&
+    activeCheckoutDetails.customerName.trim() &&
+    activeCheckoutDetails.customerPhone.trim() &&
+    activeCheckoutDetails.customerEmail.trim() &&
+    activeCheckoutDetails.deliveryAddress.trim() &&
+    activeCheckoutDetails.district.trim() &&
+    activeCheckoutDetails.thana.trim();
+
+  const updateCheckoutField = (field: keyof typeof checkoutDetails, value: string) => {
+    setCheckoutDetails((current) => ({ ...current, [field]: value }));
+  };
+
+  const submitOrder = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setOrderStatus("submitting");
+    setOrderMessage("");
+
+    const order: CheckoutOrder = {
+      orderId: "pending",
+      customerName: activeCheckoutDetails.customerName.trim(),
+      customerPhone: activeCheckoutDetails.customerPhone.trim(),
+      customerEmail: activeCheckoutDetails.customerEmail.trim(),
+      deliveryAddress: activeCheckoutDetails.deliveryAddress.trim(),
+      district: activeCheckoutDetails.district.trim(),
+      thana: activeCheckoutDetails.thana.trim(),
+      items: cartProducts.map(({ item, product }) => ({
+        productSlug: product.slug,
+        productName: product.name,
+        size: item.size,
+        color: item.color,
+        quantity: item.quantity,
+        unitPrice: product.price,
+        lineTotal: product.price * item.quantity,
+      })),
+      subtotal: total,
+      deliveryCharge,
+      vat: vatCharge,
+      grandTotal,
+      paymentMethod: COD_PAYMENT_METHOD,
+      createdAt: "pending",
+    };
+
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(order),
+      });
+      const result = (await response.json()) as { error?: string; orderId?: string };
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Could not place order.");
+      }
+
+      clearCart();
+      setOrderStatus("success");
+      setOrderMessage(`Order ${result.orderId ?? order.orderId} placed. We sent it to the admin for confirmation.`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error) {
+      setOrderStatus("error");
+      setOrderMessage(error instanceof Error ? error.message : "Could not place order.");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -56,6 +143,11 @@ export function CartView() {
         <p className="text-sm font-semibold uppercase tracking-[0.28em] text-orange-600">Cart</p>
         <h1 className="mt-3 text-4xl font-semibold text-zinc-950">Your selected pieces</h1>
       </div>
+      {orderStatus === "success" && orderMessage && (
+        <div className="rounded-[2rem] border border-emerald-200 bg-emerald-50 p-6 text-sm leading-7 text-emerald-800">
+          {orderMessage}
+        </div>
+      )}
       {cartProducts.length > 0 ? (
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
           <div className="space-y-4">
@@ -124,7 +216,18 @@ export function CartView() {
               Delivery address
               <select
                 value={selectedAddress?.id ?? ""}
-                onChange={(event) => setSelectedAddressId(event.target.value)}
+                onChange={(event) => {
+                  const nextAddress = savedAddresses.find((address) => address.id === event.target.value);
+                  setSelectedAddressId(event.target.value);
+                  setCheckoutDetails({
+                    customerName: nextAddress?.fullName ?? "",
+                    customerPhone: nextAddress?.phoneNumber ?? "",
+                    customerEmail: nextAddress?.gmail ?? "",
+                    deliveryAddress: nextAddress?.fullAddress ?? "",
+                    district: nextAddress?.district ?? "",
+                    thana: nextAddress?.thana ?? "",
+                  });
+                }}
                 disabled={savedAddresses.length === 0}
                 className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-zinc-950"
               >
@@ -137,8 +240,36 @@ export function CartView() {
               </select>
             </label>
             <p className="mt-2 text-xs text-zinc-500">
-              Change your saved address here. Delivery charge updates from the selected address district.
+              Choose a saved address or enter the delivery details below.
             </p>
+            <form className="mt-5 space-y-3" onSubmit={submitOrder}>
+              {[
+                ["customerName", "Customer name"],
+                ["customerPhone", "Phone number"],
+                ["customerEmail", "Email"],
+                ["deliveryAddress", "Delivery address"],
+                ["district", "District"],
+                ["thana", "Thana"],
+              ].map(([field, label]) => (
+                <label key={field} className="block text-sm text-zinc-700">
+                  {label}
+                  <input
+                    type={field === "customerEmail" ? "email" : "text"}
+                    value={activeCheckoutDetails[field as keyof typeof activeCheckoutDetails]}
+                    onChange={(event) =>
+                      updateCheckoutField(field as keyof typeof checkoutDetails, event.target.value)
+                    }
+                    required
+                    className="mt-2 w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-zinc-950"
+                  />
+                </label>
+              ))}
+              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
+                <span className="block text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">
+                  Payment method
+                </span>
+                <span className="mt-1 block font-semibold text-zinc-950">{COD_PAYMENT_METHOD}</span>
+              </div>
             <div className="mt-3 flex items-center justify-between text-sm text-zinc-600">
               <span>Delivery district</span>
               <span>{selectedDistrict || "Choose address"}</span>
@@ -164,10 +295,24 @@ export function CartView() {
             </p>
             <div className="mt-6 border-t border-zinc-200 pt-6">
               <p className="text-xl font-semibold text-zinc-950">{formatPrice(grandTotal)}</p>
-              <Link href="/dashboard" className="mt-4 inline-flex w-full justify-center rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white">
-                Continue to Checkout Setup
-              </Link>
+              <button
+                type="submit"
+                disabled={!canSubmitOrder || orderStatus === "submitting"}
+                className="mt-4 inline-flex w-full justify-center rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition enabled:hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {orderStatus === "submitting" ? "Placing order..." : "Place Cash on Delivery Order"}
+              </button>
+              {orderMessage && (
+                <p
+                  className={`mt-3 text-sm ${
+                    orderStatus === "error" ? "text-rose-700" : "text-emerald-700"
+                  }`}
+                >
+                  {orderMessage}
+                </p>
+              )}
             </div>
+            </form>
           </aside>
         </div>
       ) : (
