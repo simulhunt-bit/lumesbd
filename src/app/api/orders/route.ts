@@ -4,10 +4,45 @@ import { sendAdminOrderEmail } from "@/lib/email";
 import { getProducts } from "@/lib/catalog";
 import { deliveryChargeForWeight, VAT_CHARGE } from "@/lib/utils";
 import { COD_PAYMENT_METHOD, type CheckoutOrder, validateCheckoutOrder } from "@/lib/orders";
+import { getClientIp, rateLimit } from "@/lib/rate-limit";
+
+const MAX_ORDER_BODY_BYTES = 20_000;
+
+const readJsonBody = async (req: Request) => {
+  const body = await req.text();
+
+  if (body.length > MAX_ORDER_BODY_BYTES) {
+    throw new Error("Order request is too large.");
+  }
+
+  return JSON.parse(body) as CheckoutOrder;
+};
 
 export async function POST(req: Request) {
   try {
-    const order = (await req.json()) as CheckoutOrder;
+    const origin = req.headers.get("origin");
+    const requestOrigin = new URL(req.url).origin;
+
+    if (origin && origin !== requestOrigin) {
+      return NextResponse.json({ error: "Invalid order origin." }, { status: 403 });
+    }
+
+    const ip = getClientIp(req);
+    const limit = rateLimit(`orders:${ip}`, 5, 15 * 60 * 1000);
+
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Too many order attempts. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(limit.retryAfter),
+          },
+        },
+      );
+    }
+
+    const order = await readJsonBody(req);
     const products = getProducts();
     const items = order.items.map((item) => {
       const product = products.find((entry) => entry.slug === item.productSlug);
