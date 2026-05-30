@@ -1,18 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 
 export function LoginPanel() {
-  const { authEnabled, loginWithGoogle } = useAuth();
+  const router = useRouter();
+  const { authEnabled, loginWithGoogle, user } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      router.replace("/dashboard");
+    }
+  }, [router, user]);
 
   const handleGoogle = async () => {
     try {
       setLoading(true);
       setError("");
       await loginWithGoogle();
+      router.push("/dashboard");
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Could not log in with Google.");
     } finally {

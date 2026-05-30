@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { useState } from "react";
 import { useShop } from "@/context/shop-context";
@@ -16,10 +17,15 @@ export function ProductCard({
   product: Product;
   variant?: { size: string; color: string };
 }) {
-  const { addToWishlist, removeFromWishlist, wishlist } = useShop();
+  const router = useRouter();
+  const { addToCart, addToWishlist, removeFromWishlist, wishlist } = useShop();
   const [open, setOpen] = useState(false);
   const savedItem = wishlist.find((item) => item.slug === product.slug);
   const isSaved = Boolean(savedItem);
+  const buyNowVariant = {
+    size: variant?.size ?? product.sizes[0] ?? "",
+    color: variant?.color ?? product.colors[0]?.name ?? "",
+  };
 
   return (
     <>
@@ -69,7 +75,14 @@ export function ProductCard({
             <p className={`text-xs font-semibold uppercase tracking-[0.18em] ${product.stock > 0 ? "text-emerald-700" : "text-rose-700"}`}>
               {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
             </p>
-            <button type="button" onClick={() => setOpen(true)} className="rounded-full bg-zinc-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800">
+            <button
+              type="button"
+              onClick={() => {
+                addToCart(product, buyNowVariant);
+                router.push("/cart");
+              }}
+              className="rounded-full bg-zinc-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
+            >
               Buy Now
             </button>
           </div>

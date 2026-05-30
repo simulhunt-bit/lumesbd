@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useShop } from "@/context/shop-context";
@@ -17,6 +17,7 @@ export function ProductModal({
   open: boolean;
   onClose: () => void;
 }) {
+  const router = useRouter();
   const { addToCart, addToWishlist } = useShop();
   const [selectedSize, setSelectedSize] = useState(product?.sizes[0] ?? "");
   const [selectedColor, setSelectedColor] = useState(product?.colors[0]?.name ?? "");
@@ -115,9 +116,17 @@ export function ProductModal({
                   >
                     Add to Cart
                   </button>
-                  <Link href={`/products/${product.slug}`} className="rounded-full bg-zinc-950 px-5 py-3 text-center text-sm font-medium text-white transition hover:bg-zinc-800">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addToCart(product, { size: selectedSize, color: selectedColor });
+                      onClose();
+                      router.push("/cart");
+                    }}
+                    className="rounded-full bg-zinc-950 px-5 py-3 text-center text-sm font-medium text-white transition hover:bg-zinc-800"
+                  >
                     Buy Now
-                  </Link>
+                  </button>
                 </>
               ) : (
                 <button
