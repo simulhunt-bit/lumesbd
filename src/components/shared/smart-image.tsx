@@ -1,19 +1,20 @@
 "use client";
 
-import Image, { type ImageProps } from "next/image";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ImgHTMLAttributes, SyntheticEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-type SmartImageProps = Omit<ImageProps, "src"> & {
+type SmartImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> & {
   src?: string | null;
+  fill?: boolean;
   imageClassName?: string;
+  priority?: boolean;
 };
 
 const LOGO_FALLBACK = "/lumes-image-placeholder.png";
 const MIN_PLACEHOLDER_MS = 850;
 
-export function SmartImage({ src, alt, className, imageClassName, onLoad, onError, ...props }: SmartImageProps) {
+export function SmartImage({ src, alt = "", className, imageClassName, onLoad, onError, ...props }: SmartImageProps) {
   return (
     <SmartImageRenderer
       key={src ?? "empty-image"}
@@ -28,12 +29,21 @@ export function SmartImage({ src, alt, className, imageClassName, onLoad, onErro
   );
 }
 
-function SmartImageRenderer({ src, alt, className, imageClassName, onLoad, onError, ...props }: SmartImageProps) {
+function SmartImageRenderer({
+  src,
+  alt = "",
+  className,
+  imageClassName,
+  onLoad,
+  onError,
+  fill,
+  priority,
+  ...props
+}: SmartImageProps) {
   const revealTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [ready, setReady] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [failed, setFailed] = useState(!src);
-  const fillsParent = Boolean(props.fill);
   const placeholderBackground = {
     backgroundColor: "#08112d",
     backgroundImage: `radial-gradient(circle at center, rgba(1,197,250,0.2), rgba(6,12,36,0.95)), url("${LOGO_FALLBACK}")`,
@@ -50,9 +60,22 @@ function SmartImageRenderer({ src, alt, className, imageClassName, onLoad, onErr
     };
   }, []);
 
+  const handleLoad = (event: SyntheticEvent<HTMLImageElement>) => {
+    setReady(true);
+    revealTimer.current = setTimeout(() => setRevealed(true), MIN_PLACEHOLDER_MS);
+    onLoad?.(event);
+  };
+
+  const handleError = (event: SyntheticEvent<HTMLImageElement>) => {
+    setFailed(true);
+    setReady(false);
+    setRevealed(false);
+    onError?.(event);
+  };
+
   return (
     <div
-      className={cn("relative overflow-hidden", fillsParent && "absolute inset-0", className)}
+      className={cn("relative overflow-hidden", fill && "absolute inset-0", className)}
       style={placeholderBackground}
     >
       <div
@@ -73,23 +96,18 @@ function SmartImageRenderer({ src, alt, className, imageClassName, onLoad, onErr
         />
       </div>
       {src && !failed ? (
-        <Image
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
           {...props}
           src={src}
           alt={alt}
-          onLoad={(event) => {
-            setReady(true);
-            revealTimer.current = setTimeout(() => setRevealed(true), MIN_PLACEHOLDER_MS);
-            onLoad?.(event);
-          }}
-          onError={(event) => {
-            setFailed(true);
-            setReady(false);
-            setRevealed(false);
-            onError?.(event);
-          }}
+          loading={priority ? "eager" : props.loading ?? "lazy"}
+          decoding={props.decoding ?? "async"}
+          onLoad={handleLoad}
+          onError={handleError}
           className={cn(
             "relative z-10 transition duration-700 ease-out",
+            fill && "absolute inset-0 h-full w-full",
             ready && revealed ? "translate-y-0 opacity-100" : "-translate-y-3 opacity-0",
             imageClassName,
           )}
