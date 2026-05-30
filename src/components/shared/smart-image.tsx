@@ -1,6 +1,7 @@
 "use client";
 
 import Image, { type ImageProps } from "next/image";
+import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,13 @@ function SmartImageRenderer({ src, alt, className, imageClassName, onLoad, onErr
   const [revealed, setRevealed] = useState(false);
   const [failed, setFailed] = useState(!src);
   const fillsParent = Boolean(props.fill);
+  const placeholderBackground = {
+    backgroundColor: "#08112d",
+    backgroundImage: `radial-gradient(circle at center, rgba(1,197,250,0.2), rgba(6,12,36,0.95)), url("${LOGO_FALLBACK}")`,
+    backgroundPosition: "center, center",
+    backgroundRepeat: "no-repeat, no-repeat",
+    backgroundSize: "100% 100%, min(44%, 176px) auto",
+  } satisfies CSSProperties;
 
   useEffect(() => {
     return () => {
@@ -43,10 +51,13 @@ function SmartImageRenderer({ src, alt, className, imageClassName, onLoad, onErr
   }, []);
 
   return (
-    <div className={cn("relative overflow-hidden bg-[#08112d]", fillsParent && "absolute inset-0", className)}>
+    <div
+      className={cn("relative overflow-hidden", fillsParent && "absolute inset-0", className)}
+      style={placeholderBackground}
+    >
       <div
         className={cn(
-          "pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[radial-gradient(circle_at_center,_rgba(1,197,250,0.2),_rgba(6,12,36,0.95))] transition duration-500",
+          "pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-[radial-gradient(circle_at_center,_rgba(1,197,250,0.2),_rgba(6,12,36,0.95))] transition duration-500",
           revealed && !failed ? "translate-y-2 opacity-0" : "translate-y-0 opacity-100",
         )}
       >
@@ -78,7 +89,7 @@ function SmartImageRenderer({ src, alt, className, imageClassName, onLoad, onErr
             onError?.(event);
           }}
           className={cn(
-            "relative z-0 transition duration-700 ease-out",
+            "relative z-10 transition duration-700 ease-out",
             ready && revealed ? "translate-y-0 opacity-100" : "-translate-y-3 opacity-0",
             imageClassName,
           )}

@@ -30,7 +30,7 @@ export function ProductCard({
         <SmartImage src={product.images[0]} alt={product.name} fill imageClassName="object-cover group-hover:scale-105" sizes="(max-width: 768px) 100vw, 25vw" />
         <button
           type="button"
-          className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-cyan-200/20 bg-[#060c24]/78 text-cyan-50 shadow-sm backdrop-blur transition hover:border-cyan-300/40 hover:text-[#01c5fa]"
+          className="absolute right-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-cyan-200/20 bg-[#060c24]/78 text-cyan-50 shadow-sm backdrop-blur transition hover:border-cyan-300/40 hover:text-[#01c5fa]"
           onClick={() => {
             if (isSaved && savedItem) {
               removeFromWishlist(savedItem.id);
@@ -46,7 +46,7 @@ export function ProductCard({
           <Heart className={`h-4 w-4 ${isSaved ? "fill-current text-rose-400" : ""}`} />
         </button>
         {product.badge && (
-          <span className="absolute left-4 top-4 rounded-full border border-cyan-200/20 bg-[#01c5fa]/16 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-50 backdrop-blur">
+          <span className="absolute left-4 top-4 z-40 rounded-full border border-cyan-200/20 bg-[#01c5fa]/16 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-50 backdrop-blur">
             {product.badge}
           </span>
         )}
