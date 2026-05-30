@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useShop } from "@/context/shop-context";
 import { useAuth } from "@/context/auth-context";
 import { getProducts } from "@/lib/catalog";
@@ -34,28 +34,16 @@ export function CartView() {
   const total = cartProducts.reduce((sum, entry) => sum + entry.product.price * entry.item.quantity, 0);
   const totalItems = cartProducts.reduce((sum, entry) => sum + entry.item.quantity, 0);
 
-  const savedDistricts = profile?.addresses
-    .map((address) => address.district.trim())
-    .filter(Boolean) ?? [];
+  const savedAddresses = profile?.addresses.filter((address) => address.district.trim()) ?? [];
+  const defaultAddress = savedAddresses.find((address) => address.isDefault) ?? savedAddresses[0];
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const selectedAddress =
+    savedAddresses.find((address) => address.id === selectedAddressId) ??
+    defaultAddress;
+  const selectedDistrict = selectedAddress?.district.trim() ?? "";
 
-  const uniqueDistricts = Array.from(new Set(savedDistricts));
-  const defaultDistrict =
-    profile?.addresses.find((address) => address.isDefault)?.district.trim() ||
-    uniqueDistricts[0] ||
-    "";
-
-  const [selectedDistrict, setSelectedDistrict] = useState(defaultDistrict);
-
-  useEffect(() => {
-    if (!selectedDistrict && defaultDistrict) {
-      setSelectedDistrict(defaultDistrict);
-    }
-  }, [defaultDistrict, selectedDistrict]);
-
-  const districtOptions =
-    uniqueDistricts.length > 0
-      ? uniqueDistricts
-      : ["Dhaka", "Chattogram", "Rajshahi", "Sylhet", "Khulna", "Barishal", "Mymensingh", "Rangpur"];
+  const addressLabel = (address: typeof savedAddresses[number]) =>
+    [address.fullName, address.district, address.thana].filter(Boolean).join(" - ");
 
   const deliveryCharge = deliveryChargeForWeight(selectedDistrict, totalItems);
   const vatCharge = VAT_CHARGE;
@@ -103,27 +91,35 @@ export function CartView() {
               <span>{formatPrice(total)}</span>
             </div>
             <label className="mt-4 block text-sm text-zinc-700">
-              Delivery district
+              Delivery address
               <select
-                value={selectedDistrict}
-                onChange={(event) => setSelectedDistrict(event.target.value)}
+                value={selectedAddress?.id ?? ""}
+                onChange={(event) => setSelectedAddressId(event.target.value)}
+                disabled={savedAddresses.length === 0}
                 className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-zinc-950"
               >
-                <option value="">Select district</option>
-                {districtOptions.map((district) => (
-                  <option key={district} value={district}>
-                    {district}
+                <option value="">{savedAddresses.length > 0 ? "Select saved address" : "No saved address found"}</option>
+                {savedAddresses.map((address) => (
+                  <option key={address.id} value={address.id}>
+                    {addressLabel(address)}
                   </option>
                 ))}
               </select>
             </label>
+            <p className="mt-2 text-xs text-zinc-500">
+              Change your saved address here. Delivery charge updates from the selected address district.
+            </p>
+            <div className="mt-3 flex items-center justify-between text-sm text-zinc-600">
+              <span>Delivery district</span>
+              <span>{selectedDistrict || "Choose address"}</span>
+            </div>
             <div className="mt-3 flex items-center justify-between text-sm text-zinc-600">
               <span>Delivery charge</span>
-              <span>{selectedDistrict ? formatPrice(deliveryCharge) : "Choose district"}</span>
+              <span>{selectedDistrict ? formatPrice(deliveryCharge) : "Choose address"}</span>
             </div>
             <div className="mt-3 flex items-center justify-between text-sm text-zinc-600">
               <span>Delivery weight</span>
-              <span>{selectedDistrict ? deliveryWeightText : "Choose district"}</span>
+              <span>{selectedDistrict ? deliveryWeightText : "Choose address"}</span>
             </div>
             <div className="mt-3 flex items-center justify-between text-sm text-zinc-600">
               <span>VAT</span>
