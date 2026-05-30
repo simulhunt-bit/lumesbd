@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useShop } from "@/context/shop-context";
+import { SmartImage } from "@/components/shared/smart-image";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/catalog";
 
@@ -57,7 +57,7 @@ export function ProductModal({
         <div className="grid gap-5 p-4 sm:grid-cols-[0.9fr_1.1fr] sm:gap-6 sm:p-6">
           <div className="overflow-hidden rounded-[1.75rem] bg-[linear-gradient(180deg,_#fff7ed,_#f8fafc)] p-4">
             <div className="relative aspect-[4/4.2] overflow-hidden rounded-[1.25rem]">
-              <Image src={product.images[0]} alt={product.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 40vw" />
+              <SmartImage src={product.images[0]} alt={product.name} fill imageClassName="object-cover" sizes="(max-width: 768px) 100vw, 40vw" />
             </div>
           </div>
           <div>

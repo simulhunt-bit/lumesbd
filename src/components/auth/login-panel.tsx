@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowRight, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
+import { Logo } from "@/components/shared/logo";
 
 export function LoginPanel() {
   const router = useRouter();
@@ -30,34 +32,65 @@ export function LoginPanel() {
   };
 
   return (
-    <div className="grid gap-8 rounded-2xl border border-cyan-500/20 bg-[#0a1428] p-6 shadow-[0_24px_70px_-48px_rgba(1,197,250,0.2)] lg:grid-cols-2 lg:p-10">
-      <div className="space-y-6">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400/80">Access</p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">Login to your<br />LUMES account</h1>
-        </div>
-        <p className="max-w-sm text-sm leading-7 text-cyan-100/70">
-          Google login is wired for Firebase Authentication and is the only enabled account access method for this storefront.
-        </p>
-        {!authEnabled && (
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm leading-7 text-amber-200">
-            Firebase environment variables are not configured yet. The UI is ready, but authentication will stay disabled until you add your keys.
+    <div className="overflow-hidden rounded-[2rem] border border-cyan-400/20 bg-[#08112d] shadow-[0_30px_90px_-55px_rgba(1,197,250,0.45)]">
+      <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
+        <section className="relative min-h-[440px] overflow-hidden bg-[radial-gradient(circle_at_20%_20%,_rgba(1,197,250,0.22),_transparent_34%),linear-gradient(135deg,_#060c24,_#0d1535_52%,_#08112d)] p-6 sm:p-8 lg:p-10">
+          <div className="relative z-10 flex h-full flex-col justify-between gap-10">
+            <Logo />
+            <div className="max-w-xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200/80">Member Access</p>
+              <h1 className="mt-4 max-w-lg text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+                Your LUMES account, ready for faster checkout.
+              </h1>
+              <p className="mt-5 text-sm leading-7 text-cyan-50/72 sm:text-base sm:leading-8">
+                Sign in once to keep delivery details, wishlist picks, and order-ready checkout information close at hand.
+              </p>
+            </div>
+            <div className="grid gap-3 text-sm text-cyan-50/78 sm:grid-cols-3">
+              {["Saved addresses", "Wishlist sync", "Secure access"].map((item) => (
+                <div key={item} className="flex items-center gap-2 rounded-xl border border-cyan-300/15 bg-white/5 px-3 py-3 backdrop-blur">
+                  <CheckCircle2 className="h-4 w-4 text-[#01c5fa]" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        )}
-      </div>
-      <div className="space-y-5 rounded-xl border border-cyan-500/20 bg-[#060c24] p-6 sm:p-8">
-        <p className="text-sm leading-7 text-cyan-100/70">
-          Continue with your Google account to access your saved profile, delivery addresses, wishlist, and order-ready checkout details.
-        </p>
-        <button
-          type="button"
-          disabled={!authEnabled || loading}
-          onClick={handleGoogle}
-          className="w-full rounded-full border border-cyan-400/20 bg-transparent px-5 py-3 text-sm font-medium text-cyan-100/78 transition enabled:hover:border-cyan-400/50 enabled:hover:text-[#01c5fa] disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {loading ? "Signing in..." : "Continue with Google"}
-        </button>
-        {error && <p className="text-sm leading-6 text-rose-400">{error}</p>}
+        </section>
+
+        <section className="bg-white p-6 text-zinc-950 sm:p-8 lg:p-10">
+          <div className="flex h-full flex-col justify-center">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
+              <ShieldCheck className="h-4 w-4" />
+              Private account
+            </div>
+            <h2 className="mt-6 text-3xl font-semibold tracking-tight text-zinc-950">Continue securely</h2>
+            <p className="mt-3 text-sm leading-7 text-zinc-600">
+              Use Google sign-in to access your LUMES BD profile. We use it only for account access and saved shopping details.
+            </p>
+
+            <button
+              type="button"
+              disabled={!authEnabled || loading}
+              onClick={handleGoogle}
+              className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 py-3.5 text-sm font-semibold text-white transition enabled:hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500"
+            >
+              <Sparkles className="h-4 w-4" />
+              {loading ? "Signing in..." : "Continue with Google"}
+              <ArrowRight className="h-4 w-4" />
+            </button>
+
+            <p className="mt-4 text-xs leading-6 text-zinc-500">
+              Cash on Delivery remains the only payment method at checkout.
+            </p>
+
+            {!authEnabled && (
+              <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-800">
+                Account access is temporarily unavailable. Please check the Firebase environment configuration before accepting customer sign-ins.
+              </div>
+            )}
+            {error && <p className="mt-4 text-sm leading-6 text-rose-600">{error}</p>}
+          </div>
+        </section>
       </div>
     </div>
   );

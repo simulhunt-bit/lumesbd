@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/shared/container";
+import { SmartImage } from "@/components/shared/smart-image";
 import type { EventSection as EventSectionType } from "@/types/catalog";
 
 export function EventSection({ event }: { event: EventSectionType }) {
@@ -24,7 +24,7 @@ export function EventSection({ event }: { event: EventSectionType }) {
             </Link>
           </div>
           <div className="relative aspect-[16/10] overflow-hidden rounded-[1.6rem]">
-            <Image src={event.image} alt={event.title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 40vw" />
+            <SmartImage src={event.image} alt={event.title} fill imageClassName="object-cover" sizes="(max-width: 1024px) 100vw, 40vw" />
           </div>
         </div>
       </Container>

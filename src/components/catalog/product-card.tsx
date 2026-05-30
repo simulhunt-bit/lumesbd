@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { useShop } from "@/context/shop-context";
+import { SmartImage } from "@/components/shared/smart-image";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/catalog";
 
@@ -27,7 +27,7 @@ export function ProductCard({
   return (
     <article className="group overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-[0_24px_60px_-48px_rgba(24,24,27,0.65)] transition hover:-translate-y-1 hover:shadow-[0_32px_70px_-42px_rgba(24,24,27,0.36)]">
       <div className="relative aspect-[4/4.6] overflow-hidden bg-[linear-gradient(180deg,_#fff7ed,_#f8fafc)]">
-        <Image src={product.images[0]} alt={product.name} fill className="object-cover transition duration-500 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 25vw" />
+        <SmartImage src={product.images[0]} alt={product.name} fill imageClassName="object-cover group-hover:scale-105" sizes="(max-width: 768px) 100vw, 25vw" />
         <button
           type="button"
           className="absolute right-4 top-4 rounded-full bg-white/90 p-3 text-zinc-700 shadow-sm backdrop-blur transition hover:text-zinc-950"

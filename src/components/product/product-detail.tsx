@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Check, Heart, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { useShop } from "@/context/shop-context";
+import { SmartImage } from "@/components/shared/smart-image";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/catalog";
 
@@ -20,7 +20,7 @@ export function ProductDetail({ product }: { product: Product }) {
       <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.08fr_0.92fr]">
         <div className="space-y-4">
           <div className="relative aspect-[4/4.5] overflow-hidden rounded-[1.6rem] bg-[linear-gradient(180deg,_#fff7ed,_#f8fafc)] sm:rounded-[2rem]">
-            <Image src={activeImage} alt={product.name} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
+            <SmartImage src={activeImage} alt={product.name} fill imageClassName="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
           </div>
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {product.images.map((image) => (
@@ -30,7 +30,7 @@ export function ProductDetail({ product }: { product: Product }) {
                 onClick={() => setActiveImage(image)}
                 className={`relative aspect-square overflow-hidden rounded-[1rem] border sm:rounded-[1.4rem] ${activeImage === image ? "border-zinc-950" : "border-zinc-200"}`}
               >
-                <Image src={image} alt={product.name} fill className="object-cover" sizes="33vw" />
+                <SmartImage src={image} alt={product.name} fill imageClassName="object-cover" sizes="33vw" />
               </button>
             ))}
           </div>

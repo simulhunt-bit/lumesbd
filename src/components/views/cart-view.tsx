@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useState, type FormEvent } from "react";
 import { useShop } from "@/context/shop-context";
 import { useAuth } from "@/context/auth-context";
+import { SmartImage } from "@/components/shared/smart-image";
 import { getProducts } from "@/lib/catalog";
 import { formatPrice, deliveryChargeForWeight, VAT_CHARGE } from "@/lib/utils";
 import { COD_PAYMENT_METHOD, type CheckoutOrder } from "@/lib/orders";
@@ -154,7 +154,7 @@ export function CartView() {
             {cartProducts.map(({ item, product }) => (
               <article key={item.id} className="grid gap-4 rounded-[2rem] border border-zinc-200 bg-white p-4 sm:grid-cols-[160px_1fr]">
                 <div className="relative aspect-[4/4.2] overflow-hidden rounded-[1.4rem] bg-zinc-50">
-                  <Image src={product.images[0]} alt={product.name} fill className="object-cover" sizes="160px" />
+                  <SmartImage src={product.images[0]} alt={product.name} fill imageClassName="object-cover" sizes="160px" />
                 </div>
                 <div className="flex flex-col justify-between gap-4">
                   <div>
