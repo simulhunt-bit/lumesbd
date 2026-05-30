@@ -18,7 +18,7 @@ const escapeHtml = (value: string | number) =>
     .replaceAll("'", "&#39;");
 
 const getRequiredEnv = (key: string) => {
-  const value = process.env[key];
+  const value = process.env[key]?.trim();
   if (!value) {
     throw new Error(`${key} is required for order email delivery.`);
   }
@@ -36,7 +36,7 @@ const createTransport = () =>
     },
   });
 
-const fromAddress = () => process.env.SMTP_FROM ?? `LUMES BD <${getRequiredEnv("SMTP_USER")}>`;
+const fromAddress = () => process.env.SMTP_FROM?.trim() ?? `LUMES BD <${getRequiredEnv("SMTP_USER")}>`;
 
 const signAction = (payload: string, action: OrderAction) =>
   crypto
