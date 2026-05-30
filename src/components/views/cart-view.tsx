@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
+import { ArrowRight, CreditCard, Package, ShoppingBag, Trash2 } from "lucide-react";
 import { useShop } from "@/context/shop-context";
 import { useAuth } from "@/context/auth-context";
 import { SmartImage } from "@/components/shared/smart-image";
@@ -138,42 +139,78 @@ export function CartView() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.28em] text-orange-600">Cart</p>
-        <h1 className="mt-3 text-4xl font-semibold text-zinc-950">Your selected pieces</h1>
-      </div>
+    <div className="space-y-5 sm:space-y-6">
+      <section className="overflow-hidden rounded-[1.75rem] border border-cyan-400/15 bg-[#08112d] p-5 text-white shadow-2xl shadow-slate-950/10 sm:rounded-[2rem] sm:p-7">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">Cart</p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-normal text-white sm:text-4xl">
+              Your selected pieces
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
+              Review your LUMES picks, confirm delivery details, and place a Cash on Delivery order.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:min-w-56">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+              <span className="block text-xs text-slate-400">Items</span>
+              <strong className="mt-1 block text-xl text-white">{totalItems}</strong>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+              <span className="block text-xs text-slate-400">Subtotal</span>
+              <strong className="mt-1 block text-lg text-cyan-100">{formatPrice(total)}</strong>
+            </div>
+          </div>
+        </div>
+      </section>
       {orderStatus === "success" && orderMessage && (
-        <div className="rounded-[2rem] border border-emerald-200 bg-emerald-50 p-6 text-sm leading-7 text-emerald-800">
+        <div className="rounded-[1.5rem] border border-emerald-300/50 bg-emerald-50 p-5 text-sm leading-7 text-emerald-800 sm:rounded-[2rem] sm:p-6">
           {orderMessage}
         </div>
       )}
       {cartProducts.length > 0 ? (
-        <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(290px,360px)] lg:gap-6">
           <div className="space-y-4">
             {cartProducts.map(({ item, product }) => (
-              <article key={item.id} className="grid gap-4 rounded-[2rem] border border-zinc-200 bg-white p-4 sm:grid-cols-[160px_1fr]">
-                <div className="relative aspect-[4/4.2] overflow-hidden rounded-[1.4rem] bg-zinc-50">
-                  <SmartImage src={product.images[0]} alt={product.name} fill imageClassName="object-cover" sizes="160px" />
+              <article
+                key={item.id}
+                className="grid gap-4 rounded-[1.5rem] border border-cyan-400/15 bg-[#08112d] p-3 text-white shadow-xl shadow-slate-950/5 sm:grid-cols-[140px_1fr] sm:rounded-[2rem] sm:p-4"
+              >
+                <div className="relative aspect-[4/4.35] overflow-hidden rounded-[1.1rem] border border-white/10 bg-slate-950 sm:rounded-[1.4rem]">
+                  <SmartImage
+                    src={product.images[0]}
+                    alt={product.name}
+                    fill
+                    imageClassName="object-cover"
+                    sizes="(max-width: 640px) 100vw, 140px"
+                  />
                 </div>
-                <div className="flex flex-col justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-semibold text-zinc-950">{product.name}</h2>
-                    <div className="mt-2 flex flex-wrap gap-2 text-sm text-zinc-600">
-                      <span>Size: {item.size}</span>
-                      <span>Color: {item.color}</span>
+                <div className="flex min-w-0 flex-col justify-between gap-4">
+                  <div className="min-w-0">
+                    <h2 className="truncate text-lg font-semibold text-white sm:text-xl">{product.name}</h2>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium text-cyan-100 sm:text-sm">
+                      <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1">
+                        Size {item.size}
+                      </span>
+                      <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1">
+                        {item.color}
+                      </span>
                     </div>
-                    <p className="mt-2 text-sm text-zinc-600">Stock: {product.stock > 0 ? `${product.stock} available` : "Out of stock"}</p>
+                    <p className="mt-3 text-xs text-slate-400 sm:text-sm">
+                      {product.stock > 0 ? `${product.stock} pieces available` : "Currently out of stock"}
+                    </p>
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-lg font-semibold text-zinc-950">{formatPrice(product.price * item.quantity)}</p>
-                    <div className="flex items-center gap-3">
-                      <div className="inline-flex h-11 items-center overflow-hidden rounded-full border border-zinc-200 bg-white">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-lg font-semibold text-cyan-100">
+                      {formatPrice(product.price * item.quantity)}
+                    </p>
+                    <div className="flex w-full flex-col gap-3 min-[420px]:flex-row sm:w-auto sm:items-center">
+                      <div className="inline-flex h-11 w-full items-center overflow-hidden rounded-full border border-white/10 bg-white/5 min-[420px]:w-auto">
                         <button
                           type="button"
                           onClick={() => updateCartQuantity(item.id, item.quantity - 1, product.stock)}
                           disabled={item.quantity <= 1}
-                          className="flex h-full w-10 items-center justify-center text-lg text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-300"
+                          className="flex h-full flex-1 items-center justify-center text-lg text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-slate-600 min-[420px]:w-10 min-[420px]:flex-none"
                           aria-label={`Decrease ${product.name} quantity`}
                         >
                           -
@@ -184,20 +221,25 @@ export function CartView() {
                           max={Math.max(1, product.stock)}
                           value={item.quantity}
                           onChange={(event) => updateCartQuantity(item.id, Number(event.target.value), product.stock)}
-                          className="h-full w-14 border-x border-zinc-200 text-center text-sm font-semibold text-zinc-950 outline-none"
+                          className="h-full w-14 border-x border-white/10 bg-transparent text-center text-sm font-semibold text-white outline-none"
                           aria-label={`${product.name} quantity`}
                         />
                         <button
                           type="button"
                           onClick={() => updateCartQuantity(item.id, item.quantity + 1, product.stock)}
                           disabled={item.quantity >= product.stock}
-                          className="flex h-full w-10 items-center justify-center text-lg text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-300"
+                          className="flex h-full flex-1 items-center justify-center text-lg text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-slate-600 min-[420px]:w-10 min-[420px]:flex-none"
                           aria-label={`Increase ${product.name} quantity`}
                         >
                           +
                         </button>
                       </div>
-                      <button type="button" onClick={() => removeFromCart(item.id)} className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-900">
+                      <button
+                        type="button"
+                        onClick={() => removeFromCart(item.id)}
+                        className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-rose-300/30 px-4 text-sm font-medium text-rose-100 transition hover:bg-rose-400/10"
+                      >
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
                         Remove
                       </button>
                     </div>
@@ -206,13 +248,21 @@ export function CartView() {
               </article>
             ))}
           </div>
-          <aside className="h-fit rounded-[2rem] border border-zinc-200 bg-white p-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-zinc-500">Order Summary</p>
-            <div className="mt-5 flex items-center justify-between text-sm text-zinc-600">
-              <span>Subtotal</span>
-              <span>{formatPrice(total)}</span>
+          <aside className="h-fit rounded-[1.75rem] border border-cyan-400/15 bg-[#08112d] p-5 text-white shadow-2xl shadow-slate-950/10 sm:rounded-[2rem] sm:p-6 lg:sticky lg:top-24">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-cyan-300/10 text-cyan-100">
+                <ShoppingBag className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">Order Summary</p>
+                <h2 className="text-lg font-semibold text-white">Cash on Delivery</h2>
+              </div>
             </div>
-            <label className="mt-4 block text-sm text-zinc-700">
+            <div className="mt-5 flex items-center justify-between text-sm text-slate-300">
+              <span>Subtotal</span>
+              <span className="font-semibold text-white">{formatPrice(total)}</span>
+            </div>
+            <label className="mt-4 block text-sm text-slate-200">
               Delivery address
               <select
                 value={selectedAddress?.id ?? ""}
@@ -229,7 +279,7 @@ export function CartView() {
                   });
                 }}
                 disabled={savedAddresses.length === 0}
-                className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-zinc-950"
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-cyan-400"
               >
                 <option value="">{savedAddresses.length > 0 ? "Select saved address" : "No saved address found"}</option>
                 {savedAddresses.map((address) => (
@@ -239,7 +289,7 @@ export function CartView() {
                 ))}
               </select>
             </label>
-            <p className="mt-2 text-xs text-zinc-500">
+            <p className="mt-2 text-xs leading-5 text-slate-400">
               Choose a saved address or enter the delivery details below.
             </p>
             <form className="mt-5 space-y-3" onSubmit={submitOrder}>
@@ -251,7 +301,7 @@ export function CartView() {
                 ["district", "District"],
                 ["thana", "Thana"],
               ].map(([field, label]) => (
-                <label key={field} className="block text-sm text-zinc-700">
+                <label key={field} className="block text-sm text-slate-200">
                   {label}
                   <input
                     type={field === "customerEmail" ? "email" : "text"}
@@ -260,52 +310,59 @@ export function CartView() {
                       updateCheckoutField(field as keyof typeof checkoutDetails, event.target.value)
                     }
                     required
-                    className="mt-2 w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-zinc-950"
+                    className="mt-2 w-full rounded-2xl border border-white/10 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-cyan-400"
                   />
                 </label>
               ))}
-              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
-                <span className="block text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">
+              <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-4 text-sm text-cyan-50">
+                <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">
+                  <CreditCard className="h-4 w-4" aria-hidden="true" />
                   Payment method
                 </span>
-                <span className="mt-1 block font-semibold text-zinc-950">{COD_PAYMENT_METHOD}</span>
+                <span className="mt-2 block font-semibold text-white">{COD_PAYMENT_METHOD}</span>
               </div>
-            <div className="mt-3 flex items-center justify-between text-sm text-zinc-600">
+            <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
               <span>Delivery district</span>
-              <span>{selectedDistrict || "Choose address"}</span>
+              <span className="text-right font-medium text-white">{selectedDistrict || "Choose address"}</span>
             </div>
-            <div className="mt-3 flex items-center justify-between text-sm text-zinc-600">
+            <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
               <span>Delivery charge</span>
-              <span>{selectedDistrict ? formatPrice(deliveryCharge) : "Choose address"}</span>
+              <span className="text-right font-medium text-white">
+                {selectedDistrict ? formatPrice(deliveryCharge) : "Choose address"}
+              </span>
             </div>
-            <div className="mt-3 flex items-center justify-between text-sm text-zinc-600">
+            <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
               <span>Delivery weight</span>
-              <span>{selectedDistrict ? deliveryWeightText : "Choose address"}</span>
+              <span className="text-right font-medium text-white">{selectedDistrict ? deliveryWeightText : "Choose address"}</span>
             </div>
-            <div className="mt-3 flex items-center justify-between text-sm text-zinc-600">
+            <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
               <span>VAT</span>
-              <span>{formatPrice(vatCharge)}</span>
+              <span className="text-right font-medium text-white">{formatPrice(vatCharge)}</span>
             </div>
-            <div className="mt-3 flex items-center justify-between text-sm text-zinc-600">
+            <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
               <span>Total</span>
-              <span>{formatPrice(grandTotal)}</span>
+              <span className="text-right font-medium text-white">{formatPrice(grandTotal)}</span>
             </div>
-            <p className="mt-4 text-xs italic text-zinc-500">
+            <p className="mt-4 text-xs leading-5 text-slate-400">
               Same address delivery: up to 3 pcs counts as 1KG. More items increase the shipment weight and delivery cost.
             </p>
-            <div className="mt-6 border-t border-zinc-200 pt-6">
-              <p className="text-xl font-semibold text-zinc-950">{formatPrice(grandTotal)}</p>
+            <div className="mt-6 border-t border-white/10 pt-6">
+              <p className="flex items-center justify-between gap-4 text-sm text-slate-300">
+                <span>Grand total</span>
+                <strong className="text-2xl text-cyan-100">{formatPrice(grandTotal)}</strong>
+              </p>
               <button
                 type="submit"
                 disabled={!canSubmitOrder || orderStatus === "submitting"}
-                className="mt-4 inline-flex w-full justify-center rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition enabled:hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition enabled:hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {orderStatus === "submitting" ? "Placing order..." : "Place Cash on Delivery Order"}
+                {orderStatus !== "submitting" && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
               </button>
               {orderMessage && (
                 <p
                   className={`mt-3 text-sm ${
-                    orderStatus === "error" ? "text-rose-700" : "text-emerald-700"
+                    orderStatus === "error" ? "text-rose-200" : "text-emerald-200"
                   }`}
                 >
                   {orderMessage}
@@ -316,8 +373,20 @@ export function CartView() {
           </aside>
         </div>
       ) : (
-        <div className="rounded-[2rem] border border-zinc-200 bg-white p-8 text-sm leading-7 text-zinc-600">
-          Your cart is empty. <Link href="/catalog" className="font-medium text-zinc-950">Browse the catalog</Link> to add products.
+        <div className="rounded-[1.75rem] border border-cyan-400/15 bg-[#08112d] p-6 text-center text-sm leading-7 text-slate-300 sm:rounded-[2rem] sm:p-8">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cyan-300/10 text-cyan-100">
+            <Package className="h-6 w-6" aria-hidden="true" />
+          </span>
+          <h2 className="mt-4 text-xl font-semibold text-white">Your cart is ready when you are</h2>
+          <p className="mx-auto mt-2 max-w-md">
+            Add your favorite pieces and come back here to confirm delivery with Cash on Delivery.
+          </p>
+          <Link
+            href="/catalog"
+            className="mt-5 inline-flex items-center justify-center rounded-full bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
+          >
+            Browse the catalog
+          </Link>
         </div>
       )}
     </div>

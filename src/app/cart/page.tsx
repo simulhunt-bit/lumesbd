@@ -3,7 +3,7 @@ import { CartView } from "@/components/views/cart-view";
 
 export default function CartPage() {
   return (
-    <Container className="py-12">
+    <Container className="py-8 sm:py-12">
       <CartView />
     </Container>
   );
