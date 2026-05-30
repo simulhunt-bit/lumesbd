@@ -30,6 +30,7 @@ type ShopContextValue = {
   wishlist: WishlistItem[];
   addToCart: (product: Product, variant?: { size: string; color: string }) => void;
   addToWishlist: (product: Product, variant?: { size: string; color: string }) => void;
+  updateCartQuantity: (id: string, quantity: number, maxQuantity?: number) => void;
   removeFromCart: (id: string) => void;
   removeFromWishlist: (id: string) => void;
   cartCount: number;
@@ -112,6 +113,15 @@ export function ShopProvider({ children }: PropsWithChildren) {
             },
           ];
         });
+      },
+      updateCartQuantity: (id, quantity, maxQuantity = Number.POSITIVE_INFINITY) => {
+        const safeMaxQuantity = Math.max(1, maxQuantity);
+        const safeQuantity = Number.isFinite(quantity) ? quantity : 1;
+        const nextQuantity = Math.min(Math.max(1, Math.floor(safeQuantity)), safeMaxQuantity);
+
+        setCart((current) =>
+          current.map((item) => (item.id === id ? { ...item, quantity: nextQuantity } : item)),
+        );
       },
       removeFromCart: (id) => setCart((current) => current.filter((item) => item.id !== id)),
       removeFromWishlist: (id) => setWishlist((current) => current.filter((item) => item.id !== id)),

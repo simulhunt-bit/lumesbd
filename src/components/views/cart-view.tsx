@@ -22,7 +22,7 @@ type CartProduct = {
 };
 
 export function CartView() {
-  const { cart, removeFromCart } = useShop();
+  const { cart, removeFromCart, updateCartQuantity } = useShop();
   const { profile } = useAuth();
   const cartProducts = cart
     .map((item) => {
@@ -71,14 +71,44 @@ export function CartView() {
                       <span>Size: {item.size}</span>
                       <span>Color: {item.color}</span>
                     </div>
-                    <p className="mt-2 text-sm text-zinc-600">Quantity: {item.quantity}</p>
                     <p className="mt-2 text-sm text-zinc-600">Stock: {product.stock > 0 ? `${product.stock} available` : "Out of stock"}</p>
                   </div>
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="text-lg font-semibold text-zinc-950">{formatPrice(product.price * item.quantity)}</p>
-                    <button type="button" onClick={() => removeFromCart(item.id)} className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-900">
-                      Remove
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <div className="inline-flex h-11 items-center overflow-hidden rounded-full border border-zinc-200 bg-white">
+                        <button
+                          type="button"
+                          onClick={() => updateCartQuantity(item.id, item.quantity - 1, product.stock)}
+                          disabled={item.quantity <= 1}
+                          className="flex h-full w-10 items-center justify-center text-lg text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-300"
+                          aria-label={`Decrease ${product.name} quantity`}
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          min={1}
+                          max={Math.max(1, product.stock)}
+                          value={item.quantity}
+                          onChange={(event) => updateCartQuantity(item.id, Number(event.target.value), product.stock)}
+                          className="h-full w-14 border-x border-zinc-200 text-center text-sm font-semibold text-zinc-950 outline-none"
+                          aria-label={`${product.name} quantity`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => updateCartQuantity(item.id, item.quantity + 1, product.stock)}
+                          disabled={item.quantity >= product.stock}
+                          className="flex h-full w-10 items-center justify-center text-lg text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-300"
+                          aria-label={`Increase ${product.name} quantity`}
+                        >
+                          +
+                        </button>
+                      </div>
+                      <button type="button" onClick={() => removeFromCart(item.id)} className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-900">
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 </div>
               </article>
