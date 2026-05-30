@@ -7,9 +7,9 @@ export const brand = {
   supportEmail: "hello@lumesbd.com",
   supportPhone: "+880 1XXX-XXXXXX",
   socials: [
-    { label: "Facebook", href: "#" },
-    { label: "Instagram", href: "#" },
-    { label: "TikTok", href: "#" },
+    { label: "Instagram", href: "https://www.instagram.com/lumesbd/" },
+    { label: "X", href: "https://x.com/lumesbd" },
+    { label: "Facebook", href: "https://www.facebook.com/lumesbd" },
   ],
 };
 
