@@ -85,7 +85,7 @@ export function LoginPanel() {
 
             {!authEnabled && (
               <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-800">
-                Account access is temporarily unavailable. Please check the Firebase environment configuration before accepting customer sign-ins.
+                Account access is temporarily unavailable. Please try again later or contact LUMES BD support for help with your profile.
               </div>
             )}
             {error && <p className="mt-4 text-sm leading-6 text-rose-600">{error}</p>}
