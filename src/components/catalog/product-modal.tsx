@@ -19,14 +19,14 @@ export function ProductModal({
 }) {
   const router = useRouter();
   const { addToCart, addToWishlist } = useShop();
-  const [selectedSize, setSelectedSize] = useState(product?.sizes[0] ?? "");
-  const [selectedColor, setSelectedColor] = useState(product?.colors[0]?.name ?? "");
+  const [selectedVariant, setSelectedVariant] = useState<{
+    slug: string;
+    size: string;
+    color: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!open) return;
-
-    setSelectedSize(product?.sizes[0] ?? "");
-    setSelectedColor(product?.colors[0]?.name ?? "");
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
@@ -34,11 +34,13 @@ export function ProductModal({
 
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, [open, onClose, product]);
+  }, [open, onClose]);
 
   if (!open || !product) return null;
 
   const inStock = product.stock > 0;
+  const selectedSize = selectedVariant?.slug === product.slug ? selectedVariant.size : product.sizes[0] ?? "";
+  const selectedColor = selectedVariant?.slug === product.slug ? selectedVariant.color : product.colors[0]?.name ?? "";
 
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-zinc-950/60 p-2 backdrop-blur-sm sm:items-center sm:justify-center sm:p-6">
@@ -70,7 +72,7 @@ export function ProductModal({
                   <button
                     key={size}
                     type="button"
-                    onClick={() => setSelectedSize(size)}
+                    onClick={() => setSelectedVariant({ slug: product.slug, size, color: selectedColor })}
                     className={`rounded-full border px-3 py-2 text-sm font-medium transition ${
                       selectedSize === size
                         ? "border-zinc-950 bg-zinc-950 text-white"
@@ -89,7 +91,7 @@ export function ProductModal({
                   <button
                     key={color.name}
                     type="button"
-                    onClick={() => setSelectedColor(color.name)}
+                    onClick={() => setSelectedVariant({ slug: product.slug, size: selectedSize, color: color.name })}
                     className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition ${
                       selectedColor === color.name
                         ? "border-zinc-950 bg-zinc-950 text-white"

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Check, Heart, ShoppingBag } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useShop } from "@/context/shop-context";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/catalog";
@@ -14,11 +14,6 @@ export function ProductDetail({ product }: { product: Product }) {
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] ?? "");
   const [selectedColor, setSelectedColor] = useState(product.colors[0]?.name ?? "");
   const { addToCart, addToWishlist } = useShop();
-
-  useEffect(() => {
-    setSelectedSize(product.sizes[0] ?? "");
-    setSelectedColor(product.colors[0]?.name ?? "");
-  }, [product]);
 
   return (
     <section className="py-8 sm:py-14">
