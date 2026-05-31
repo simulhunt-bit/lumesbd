@@ -9,7 +9,13 @@ import { LocationSelects } from "@/components/shared/location-selects";
 import { SmartImage } from "@/components/shared/smart-image";
 import { getProducts } from "@/lib/catalog";
 import { chargeableDeliveryItemCount, formatPrice, deliveryChargeForWeight } from "@/lib/utils";
-import { COD_PAYMENT_METHOD, type CheckoutOrder } from "@/lib/orders";
+import {
+  COD_PAYMENT_METHOD,
+  CUSTOMIZATION_PRICES,
+  type CheckoutOrder,
+  type CustomizationType,
+  type JerseyCustomization,
+} from "@/lib/orders";
 
 type CartItem = {
   id: string;
@@ -17,6 +23,7 @@ type CartItem = {
   quantity: number;
   size: string;
   color: string;
+  customization?: JerseyCustomization;
 };
 
 type CartProduct = {
@@ -25,7 +32,14 @@ type CartProduct = {
 };
 
 export function CartView() {
-  const { cart, addToCart, clearCart, removeFromCart, updateCartQuantity } = useShop();
+  const {
+    cart,
+    addToCart,
+    clearCart,
+    removeFromCart,
+    updateCartCustomization,
+    updateCartQuantity,
+  } = useShop();
   const { profile } = useAuth();
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [checkoutDetails, setCheckoutDetails] = useState({
@@ -45,7 +59,10 @@ export function CartView() {
     })
     .filter(Boolean) as CartProduct[];
 
-  const total = cartProducts.reduce((sum, entry) => sum + entry.product.price * entry.item.quantity, 0);
+  const total = cartProducts.reduce((sum, entry) => {
+    const customizationPrice = entry.item.customization?.price ?? 0;
+    return sum + (entry.product.price + customizationPrice) * entry.item.quantity;
+  }, 0);
   const totalItems = cartProducts.reduce((sum, entry) => sum + entry.item.quantity, 0);
   const deliveryItemCount = chargeableDeliveryItemCount(
     cartProducts.map(({ item, product }) => ({
@@ -54,6 +71,18 @@ export function CartView() {
     })),
   );
   const flagProducts = getProducts().filter((product) => product.subcategorySlug === "flags");
+  const matchingJerseyCountForFlag = (flagProduct: (typeof flagProducts)[number]) => {
+    const country = flagProduct.slug.replace(/-flag$/, "");
+
+    return cartProducts.reduce((sum, { item, product }) => {
+      if (product.subcategorySlug === "flags") return sum;
+
+      const productName = product.name.toLowerCase();
+      const isMatchingCountry = product.slug.includes(country) || productName.includes(country);
+
+      return sum + (isMatchingCountry ? item.quantity : 0);
+    }, 0);
+  };
   const recommendedFlag = cartProducts.reduce<(typeof flagProducts)[number] | null>(
     (recommendation, { product }) => {
       if (recommendation || product.subcategorySlug === "flags") return recommendation;
@@ -61,11 +90,13 @@ export function CartView() {
       return (
         flagProducts.find((flagProduct) => {
           const country = flagProduct.slug.replace(/-flag$/, "");
-          const alreadyInCart = cartProducts.some((entry) => entry.product.slug === flagProduct.slug);
+          const flagCartQuantity =
+            cartProducts.find((entry) => entry.product.slug === flagProduct.slug)?.item.quantity ?? 0;
+          const matchingJerseyCount = matchingJerseyCountForFlag(flagProduct);
 
           return (
             flagProduct.stock > 0 &&
-            !alreadyInCart &&
+            flagCartQuantity < matchingJerseyCount &&
             (product.slug.includes(country) || product.name.toLowerCase().includes(country))
           );
         }) ?? null
@@ -99,6 +130,11 @@ export function CartView() {
   const deliveryWeightText = `${Math.max(1, Math.ceil(deliveryItemCount / 3))}KG`;
   const canSubmitOrder =
     cartProducts.length > 0 &&
+    cartProducts.every(({ item }) => {
+      if (!item.customization) return true;
+
+      return item.customization.name.trim() && item.customization.number.trim();
+    }) &&
     activeCheckoutDetails.customerName.trim() &&
     activeCheckoutDetails.customerPhone.trim() &&
     activeCheckoutDetails.customerEmail.trim() &&
@@ -108,6 +144,28 @@ export function CartView() {
 
   const updateCheckoutField = (field: keyof typeof checkoutDetails, value: string) => {
     setCheckoutDetails((current) => ({ ...current, [field]: value }));
+  };
+
+  const updateCustomization = (
+    itemId: string,
+    type: CustomizationType,
+    field?: "name" | "number",
+    value = "",
+  ) => {
+    const item = cart.find((entry) => entry.id === itemId);
+    const currentCustomization = item?.customization;
+    const customization = {
+      type,
+      name: currentCustomization?.type === type ? currentCustomization.name : "",
+      number: currentCustomization?.type === type ? currentCustomization.number : "",
+      price: CUSTOMIZATION_PRICES[type],
+    };
+
+    if (field) {
+      customization[field] = value;
+    }
+
+    updateCartCustomization(itemId, customization);
   };
 
   const submitOrder = async (event: FormEvent<HTMLFormElement>) => {
@@ -129,8 +187,9 @@ export function CartView() {
         size: item.size,
         color: item.color,
         quantity: item.quantity,
-        unitPrice: product.price,
-        lineTotal: product.price * item.quantity,
+        unitPrice: product.price + (item.customization?.price ?? 0),
+        customization: item.customization,
+        lineTotal: (product.price + (item.customization?.price ?? 0)) * item.quantity,
       })),
       subtotal: total,
       deliveryCharge,
@@ -197,7 +256,15 @@ export function CartView() {
       {cartProducts.length > 0 ? (
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(290px,360px)] lg:gap-6">
           <div className="space-y-4">
-            {cartProducts.map(({ item, product }) => (
+            {cartProducts.map(({ item, product }) => {
+              const matchingJerseyCount =
+                product.subcategorySlug === "flags" ? matchingJerseyCountForFlag(product) : 0;
+              const maxCartQuantity =
+                product.subcategorySlug === "flags" && matchingJerseyCount > 0
+                  ? Math.min(product.stock, matchingJerseyCount)
+                  : product.stock;
+
+              return (
               <article
                 key={item.id}
                 className="grid gap-4 rounded-[1.5rem] border border-cyan-400/15 bg-[#08112d] p-3 text-white shadow-xl shadow-slate-950/5 sm:grid-cols-[140px_1fr] sm:rounded-[2rem] sm:p-4"
@@ -225,13 +292,13 @@ export function CartView() {
                   </div>
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <p className="text-lg font-semibold text-cyan-100">
-                      {formatPrice(product.price * item.quantity)}
+                      {formatPrice((product.price + (item.customization?.price ?? 0)) * item.quantity)}
                     </p>
                     <div className="flex w-full flex-col gap-3 min-[420px]:flex-row sm:w-auto sm:items-center">
                       <div className="inline-flex h-11 w-full items-center overflow-hidden rounded-full border border-white/10 bg-white/5 min-[420px]:w-auto">
                         <button
                           type="button"
-                          onClick={() => updateCartQuantity(item.id, item.quantity - 1, product.stock)}
+                          onClick={() => updateCartQuantity(item.id, item.quantity - 1, maxCartQuantity)}
                           disabled={item.quantity <= 1}
                           className="flex h-full flex-1 items-center justify-center text-lg text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-slate-600 min-[420px]:w-10 min-[420px]:flex-none"
                           aria-label={`Decrease ${product.name} quantity`}
@@ -241,16 +308,16 @@ export function CartView() {
                         <input
                           type="number"
                           min={1}
-                          max={Math.max(1, product.stock)}
+                          max={Math.max(1, maxCartQuantity)}
                           value={item.quantity}
-                          onChange={(event) => updateCartQuantity(item.id, Number(event.target.value), product.stock)}
+                          onChange={(event) => updateCartQuantity(item.id, Number(event.target.value), maxCartQuantity)}
                           className="h-full w-14 border-x border-white/10 bg-transparent text-center text-sm font-semibold text-white outline-none"
                           aria-label={`${product.name} quantity`}
                         />
                         <button
                           type="button"
-                          onClick={() => updateCartQuantity(item.id, item.quantity + 1, product.stock)}
-                          disabled={item.quantity >= product.stock}
+                          onClick={() => updateCartQuantity(item.id, item.quantity + 1, maxCartQuantity)}
+                          disabled={item.quantity >= maxCartQuantity}
                           className="flex h-full flex-1 items-center justify-center text-lg text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-slate-600 min-[420px]:w-10 min-[420px]:flex-none"
                           aria-label={`Increase ${product.name} quantity`}
                         >
@@ -267,9 +334,78 @@ export function CartView() {
                       </button>
                     </div>
                   </div>
+                  {product.subcategorySlug !== "flags" && (
+                    <div className="rounded-2xl border border-cyan-300/15 bg-cyan-300/5 p-3">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-white">Name & number</p>
+                          <p className="text-xs text-slate-400">One customization per jersey line.</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => updateCartCustomization(item.id)}
+                            className={`rounded-full px-3 py-2 text-xs font-semibold transition ${
+                              !item.customization
+                                ? "bg-white text-slate-950"
+                                : "border border-white/10 text-slate-300 hover:bg-white/10"
+                            }`}
+                          >
+                            None
+                          </button>
+                          {(["standard", "premium"] as const).map((type) => (
+                            <button
+                              key={type}
+                              type="button"
+                              onClick={() => updateCustomization(item.id, type)}
+                              className={`rounded-full px-3 py-2 text-xs font-semibold capitalize transition ${
+                                item.customization?.type === type
+                                  ? "bg-cyan-300 text-slate-950"
+                                  : "border border-cyan-300/20 text-cyan-100 hover:bg-cyan-300/10"
+                              }`}
+                            >
+                              {type} {formatPrice(CUSTOMIZATION_PRICES[type])}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      {item.customization && (
+                        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                          <label className="block text-xs font-medium text-slate-300">
+                            Name
+                            <input
+                              value={item.customization.name}
+                              onChange={(event) =>
+                                updateCustomization(item.id, item.customization!.type, "name", event.target.value)
+                              }
+                              required
+                              maxLength={18}
+                              className="mt-2 w-full rounded-xl border border-white/10 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-cyan-400"
+                              placeholder="MESSI"
+                            />
+                          </label>
+                          <label className="block text-xs font-medium text-slate-300">
+                            Number
+                            <input
+                              value={item.customization.number}
+                              onChange={(event) =>
+                                updateCustomization(item.id, item.customization!.type, "number", event.target.value)
+                              }
+                              required
+                              inputMode="numeric"
+                              maxLength={3}
+                              className="mt-2 w-full rounded-xl border border-white/10 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-cyan-400"
+                              placeholder="10"
+                            />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
           <aside className="h-fit rounded-[1.75rem] border border-cyan-400/15 bg-[#08112d] p-5 text-white shadow-2xl shadow-slate-950/10 sm:rounded-[2rem] sm:p-6 lg:sticky lg:top-24">
             <div className="flex items-center gap-3">

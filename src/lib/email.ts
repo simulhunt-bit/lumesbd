@@ -70,14 +70,20 @@ export const parseSignedAction = (payload: string, action: OrderAction, signatur
 const orderRows = (order: CheckoutOrder) =>
   order.items
     .map(
-      (item) => `
+      (item) => {
+        const customization = item.customization
+          ? `<div style="margin-top:4px;color:#52525b;font-size:12px;">${escapeHtml(item.customization.type)} print: ${escapeHtml(item.customization.name)} #${escapeHtml(item.customization.number)} (${escapeHtml(formatOrderPrice(item.customization.price))}/pc)</div>`
+          : "";
+
+        return `
         <tr>
-          <td style="padding:10px;border-bottom:1px solid #e4e4e7;">${escapeHtml(item.productName)}</td>
+          <td style="padding:10px;border-bottom:1px solid #e4e4e7;">${escapeHtml(item.productName)}${customization}</td>
           <td style="padding:10px;border-bottom:1px solid #e4e4e7;">${escapeHtml(item.size)}</td>
           <td style="padding:10px;border-bottom:1px solid #e4e4e7;text-align:center;">${escapeHtml(item.quantity)}</td>
           <td style="padding:10px;border-bottom:1px solid #e4e4e7;text-align:right;">${escapeHtml(formatOrderPrice(item.lineTotal))}</td>
         </tr>
-      `,
+      `;
+      },
     )
     .join("");
 
@@ -130,8 +136,13 @@ const orderText = (order: CheckoutOrder) => [
   `Payment method: ${order.paymentMethod}`,
   "Ordered products:",
   ...order.items.map(
-    (item) =>
-      `- ${item.productName} | Size: ${item.size} | Qty: ${item.quantity} | ${formatOrderPrice(item.lineTotal)}`,
+    (item) => {
+      const customization = item.customization
+        ? ` | ${item.customization.type} print: ${item.customization.name} #${item.customization.number} (${formatOrderPrice(item.customization.price)}/pc)`
+        : "";
+
+      return `- ${item.productName} | Size: ${item.size} | Qty: ${item.quantity}${customization} | ${formatOrderPrice(item.lineTotal)}`;
+    },
   ),
   `Subtotal: ${formatOrderPrice(order.subtotal)}`,
   `Delivery charge: ${formatOrderPrice(order.deliveryCharge)}`,

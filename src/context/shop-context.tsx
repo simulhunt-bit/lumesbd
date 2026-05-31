@@ -8,6 +8,7 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
+import type { JerseyCustomization } from "@/lib/orders";
 import type { Product } from "@/types/catalog";
 
 type CartItem = {
@@ -16,6 +17,7 @@ type CartItem = {
   quantity: number;
   size: string;
   color: string;
+  customization?: JerseyCustomization;
 };
 
 type WishlistItem = {
@@ -30,6 +32,7 @@ type ShopContextValue = {
   wishlist: WishlistItem[];
   addToCart: (product: Product, variant?: { size: string; color: string }) => void;
   addToWishlist: (product: Product, variant?: { size: string; color: string }) => void;
+  updateCartCustomization: (id: string, customization?: JerseyCustomization) => void;
   updateCartQuantity: (id: string, quantity: number, maxQuantity?: number) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
@@ -124,6 +127,10 @@ export function ShopProvider({ children }: PropsWithChildren) {
           current.map((item) => (item.id === id ? { ...item, quantity: nextQuantity } : item)),
         );
       },
+      updateCartCustomization: (id, customization) =>
+        setCart((current) =>
+          current.map((item) => (item.id === id ? { ...item, customization } : item)),
+        ),
       removeFromCart: (id) => setCart((current) => current.filter((item) => item.id !== id)),
       clearCart: () => setCart([]),
       removeFromWishlist: (id) => setWishlist((current) => current.filter((item) => item.id !== id)),

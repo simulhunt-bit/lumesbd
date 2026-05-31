@@ -1,5 +1,18 @@
 export const ADMIN_EMAIL = "lumesbd@gmail.com";
 export const COD_PAYMENT_METHOD = "Cash on Delivery";
+export const CUSTOMIZATION_PRICES = {
+  standard: 70,
+  premium: 150,
+} as const;
+
+export type CustomizationType = keyof typeof CUSTOMIZATION_PRICES;
+
+export type JerseyCustomization = {
+  type: CustomizationType;
+  name: string;
+  number: string;
+  price: number;
+};
 
 export type CheckoutOrderItem = {
   productSlug: string;
@@ -8,6 +21,7 @@ export type CheckoutOrderItem = {
   color: string;
   quantity: number;
   unitPrice: number;
+  customization?: JerseyCustomization;
   lineTotal: number;
 };
 
