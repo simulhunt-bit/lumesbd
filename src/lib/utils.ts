@@ -31,3 +31,15 @@ export const deliveryChargeForWeight = (district?: string, itemCount = 0) => {
   const packageCount = Math.max(1, Math.ceil(itemCount / 3));
   return baseCharge * packageCount;
 };
+
+export const chargeableDeliveryItemCount = (
+  items: { quantity: number; isFlagAddOn?: boolean }[],
+) => {
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const nonFlagItems = items.reduce(
+    (sum, item) => sum + (item.isFlagAddOn ? 0 : item.quantity),
+    0,
+  );
+
+  return nonFlagItems || totalItems;
+};

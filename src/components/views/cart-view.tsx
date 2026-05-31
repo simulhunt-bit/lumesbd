@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { ArrowRight, CreditCard, Package, ShoppingBag, Trash2 } from "lucide-react";
+import { ArrowRight, CreditCard, Package, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useShop } from "@/context/shop-context";
 import { useAuth } from "@/context/auth-context";
 import { LocationSelects } from "@/components/shared/location-selects";
 import { SmartImage } from "@/components/shared/smart-image";
 import { getProducts } from "@/lib/catalog";
-import { formatPrice, deliveryChargeForWeight } from "@/lib/utils";
+import { chargeableDeliveryItemCount, formatPrice, deliveryChargeForWeight } from "@/lib/utils";
 import { COD_PAYMENT_METHOD, type CheckoutOrder } from "@/lib/orders";
 
 type CartItem = {
@@ -25,7 +25,7 @@ type CartProduct = {
 };
 
 export function CartView() {
-  const { cart, clearCart, removeFromCart, updateCartQuantity } = useShop();
+  const { cart, addToCart, clearCart, removeFromCart, updateCartQuantity } = useShop();
   const { profile } = useAuth();
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [checkoutDetails, setCheckoutDetails] = useState({
@@ -47,6 +47,32 @@ export function CartView() {
 
   const total = cartProducts.reduce((sum, entry) => sum + entry.product.price * entry.item.quantity, 0);
   const totalItems = cartProducts.reduce((sum, entry) => sum + entry.item.quantity, 0);
+  const deliveryItemCount = chargeableDeliveryItemCount(
+    cartProducts.map(({ item, product }) => ({
+      quantity: item.quantity,
+      isFlagAddOn: product.subcategorySlug === "flags",
+    })),
+  );
+  const flagProducts = getProducts().filter((product) => product.subcategorySlug === "flags");
+  const recommendedFlag = cartProducts.reduce<(typeof flagProducts)[number] | null>(
+    (recommendation, { product }) => {
+      if (recommendation || product.subcategorySlug === "flags") return recommendation;
+
+      return (
+        flagProducts.find((flagProduct) => {
+          const country = flagProduct.slug.replace(/-flag$/, "");
+          const alreadyInCart = cartProducts.some((entry) => entry.product.slug === flagProduct.slug);
+
+          return (
+            flagProduct.stock > 0 &&
+            !alreadyInCart &&
+            (product.slug.includes(country) || product.name.toLowerCase().includes(country))
+          );
+        }) ?? null
+      );
+    },
+    null,
+  );
 
   const savedAddresses = profile?.addresses.filter((address) => address.district.trim()) ?? [];
   const defaultAddress = savedAddresses.find((address) => address.isDefault) ?? savedAddresses[0];
@@ -68,9 +94,9 @@ export function CartView() {
   const addressLabel = (address: typeof savedAddresses[number]) =>
     [address.fullName, address.district, address.thana].filter(Boolean).join(" - ");
 
-  const deliveryCharge = deliveryChargeForWeight(selectedDistrict, totalItems);
+  const deliveryCharge = deliveryChargeForWeight(selectedDistrict, deliveryItemCount);
   const grandTotal = total + deliveryCharge;
-  const deliveryWeightText = `${Math.max(1, Math.ceil(totalItems / 3))}KG`;
+  const deliveryWeightText = `${Math.max(1, Math.ceil(deliveryItemCount / 3))}KG`;
   const canSubmitOrder =
     cartProducts.length > 0 &&
     activeCheckoutDetails.customerName.trim() &&
@@ -289,6 +315,38 @@ export function CartView() {
             <p className="mt-2 text-xs leading-5 text-slate-400">
               Choose a saved address or enter the delivery details below.
             </p>
+            {recommendedFlag && (
+              <div className="mt-5 overflow-hidden rounded-2xl border border-cyan-300/20 bg-cyan-300/10">
+                <div className="grid grid-cols-[72px_1fr] gap-3 p-3">
+                  <div className="relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-slate-950">
+                    <SmartImage
+                      src={recommendedFlag.images[0]}
+                      alt={recommendedFlag.name}
+                      fill
+                      imageClassName="object-cover"
+                      sizes="72px"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">
+                      Recommended add-on
+                    </span>
+                    <p className="mt-1 truncate text-sm font-semibold text-white">{recommendedFlag.name}</p>
+                    <p className="mt-1 text-xs text-slate-300">
+                      Add before checkout with no extra delivery charge.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => addToCart(recommendedFlag)}
+                      className="mt-3 inline-flex h-10 items-center justify-center gap-2 rounded-full bg-white px-4 text-xs font-semibold text-slate-950 transition hover:bg-cyan-100"
+                    >
+                      <Plus className="h-4 w-4" aria-hidden="true" />
+                      Add {formatPrice(recommendedFlag.price)}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             <form className="mt-5 space-y-3" onSubmit={submitOrder}>
               {[
                 ["customerName", "Customer name"],

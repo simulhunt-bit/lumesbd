@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { sendAdminOrderEmail } from "@/lib/email";
 import { getProducts } from "@/lib/catalog";
-import { deliveryChargeForWeight } from "@/lib/utils";
+import { chargeableDeliveryItemCount, deliveryChargeForWeight } from "@/lib/utils";
 import { COD_PAYMENT_METHOD, type CheckoutOrder, validateCheckoutOrder } from "@/lib/orders";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 
@@ -76,8 +76,14 @@ export async function POST(req: Request) {
       };
     });
     const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
-    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-    const deliveryCharge = deliveryChargeForWeight(order.district, totalItems);
+    const deliveryItemCount = chargeableDeliveryItemCount(
+      items.map((item) => ({
+        quantity: item.quantity,
+        isFlagAddOn:
+          products.find((product) => product.slug === item.productSlug)?.subcategorySlug === "flags",
+      })),
+    );
+    const deliveryCharge = deliveryChargeForWeight(order.district, deliveryItemCount);
     const normalizedOrder: CheckoutOrder = {
       ...order,
       orderId: `LUMES-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
