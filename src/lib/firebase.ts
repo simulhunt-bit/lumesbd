@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import {
   getAuth,
   GoogleAuthProvider,
+  signInWithRedirect,
   signInWithPopup,
   RecaptchaVerifier,
   signInWithPhoneNumber,
@@ -42,7 +43,23 @@ export const signInWithGoogle = async () => {
     throw new Error("Firebase is not configured yet.");
   }
 
-  return signInWithPopup(auth, googleProvider);
+  try {
+    await signInWithPopup(auth, googleProvider);
+  } catch (error) {
+    const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
+    const shouldUseRedirect = [
+      "auth/cancelled-popup-request",
+      "auth/operation-not-supported-in-this-environment",
+      "auth/popup-blocked",
+      "auth/popup-closed-by-user",
+    ].includes(code);
+
+    if (!shouldUseRedirect) {
+      throw error;
+    }
+
+    await signInWithRedirect(auth, googleProvider);
+  }
 };
 
 export const createRecaptcha = (containerId: string) => {

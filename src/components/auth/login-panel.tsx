@@ -6,6 +6,11 @@ import { ArrowRight, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { Logo } from "@/components/shared/logo";
 
+const getRedirectPath = () => {
+  const nextPath = new URLSearchParams(window.location.search).get("next");
+  return nextPath?.startsWith("/") && !nextPath.startsWith("//") ? nextPath : "/dashboard";
+};
+
 export function LoginPanel() {
   const router = useRouter();
   const { authEnabled, loginWithGoogle, user } = useAuth();
@@ -14,7 +19,7 @@ export function LoginPanel() {
 
   useEffect(() => {
     if (user) {
-      router.replace("/dashboard");
+      router.replace(getRedirectPath());
     }
   }, [router, user]);
 
@@ -23,7 +28,7 @@ export function LoginPanel() {
       setLoading(true);
       setError("");
       await loginWithGoogle();
-      router.push("/dashboard");
+      router.push(getRedirectPath());
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Could not log in with Google.");
     } finally {

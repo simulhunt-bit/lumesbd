@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Home, LogOut, MapPin, Plus, Save, ShieldCheck, Trash2, Upload } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { Logo } from "@/components/shared/logo";
@@ -19,10 +20,17 @@ const blankAddress = (): Address => ({
 });
 
 export function DashboardShell() {
+  const router = useRouter();
   const { user, profile, loading, logout, saveAddresses, saveProfilePhoto } = useAuth();
   const [draftAddresses, setDraftAddresses] = useState<Address[] | null>(null);
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/login?next=/dashboard");
+    }
+  }, [loading, router, user]);
 
   if (loading) {
     return (
