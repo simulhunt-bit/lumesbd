@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { ArrowRight, CreditCard, Package, ShoppingBag, Trash2 } from "lucide-react";
 import { useShop } from "@/context/shop-context";
 import { useAuth } from "@/context/auth-context";
+import { LocationSelects } from "@/components/shared/location-selects";
 import { SmartImage } from "@/components/shared/smart-image";
 import { getProducts } from "@/lib/catalog";
 import { formatPrice, deliveryChargeForWeight, VAT_CHARGE } from "@/lib/utils";
@@ -295,8 +296,6 @@ export function CartView() {
                 ["customerPhone", "Phone number"],
                 ["customerEmail", "Email"],
                 ["deliveryAddress", "Delivery address"],
-                ["district", "District"],
-                ["thana", "Thana"],
               ].map(([field, label]) => (
                 <label key={field} className="block text-sm text-slate-200">
                   {label}
@@ -311,6 +310,14 @@ export function CartView() {
                   />
                 </label>
               ))}
+              <LocationSelects
+                district={activeCheckoutDetails.district}
+                thana={activeCheckoutDetails.thana}
+                onDistrictChange={(value) => updateCheckoutField("district", value)}
+                onThanaChange={(value) => updateCheckoutField("thana", value)}
+                labelClassName="block text-sm text-slate-200"
+                selectClassName="mt-2 w-full rounded-2xl border border-white/10 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+              />
               <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-4 text-sm text-cyan-50">
                 <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">
                   <CreditCard className="h-4 w-4" aria-hidden="true" />

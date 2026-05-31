@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Home, LogOut, MapPin, Plus, Save, ShieldCheck, Trash2, Upload } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { Logo } from "@/components/shared/logo";
+import { LocationSelects } from "@/components/shared/location-selects";
 import type { Address } from "@/types/catalog";
 
 const blankAddress = (): Address => ({
@@ -230,8 +231,6 @@ export function DashboardShell() {
                     {[
                       ["fullName", "Recipient name"],
                       ["fullAddress", "Full delivery address"],
-                      ["district", "District"],
-                      ["thana", "Thana"],
                       ["phoneNumber", "Phone number"],
                       ["gmail", "Email address"],
                     ].map(([field, label]) => (
@@ -250,6 +249,24 @@ export function DashboardShell() {
                         />
                       </label>
                     ))}
+                    <LocationSelects
+                      district={address.district}
+                      thana={address.thana}
+                      onDistrictChange={(value) =>
+                        updateAddresses((current) =>
+                          current.map((item) =>
+                            item.id === address.id ? { ...item, district: value, thana: "" } : item,
+                          ),
+                        )
+                      }
+                      onThanaChange={(value) =>
+                        updateAddresses((current) =>
+                          current.map((item) => (item.id === address.id ? { ...item, thana: value } : item)),
+                        )
+                      }
+                      labelClassName="text-sm font-medium text-zinc-700"
+                      selectClassName="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none ring-0 transition focus:border-cyan-500 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-500"
+                    />
                   </div>
                 </div>
               ))

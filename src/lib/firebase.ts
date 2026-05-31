@@ -9,7 +9,7 @@ import {
   type Auth,
   type ConfirmationResult,
 } from "firebase/auth";
-import { getDatabase, ref, get, set, type Database } from "firebase/database";
+import { getDatabase, ref, get, onValue, set, type Database, type Unsubscribe } from "firebase/database";
 import type { UserProfile } from "@/types/catalog";
 
 const firebaseConfig = {
@@ -88,12 +88,42 @@ export const saveUserProfile = async (uid: string, profile: UserProfile) => {
     throw new Error("Firebase Realtime Database is not configured yet.");
   }
 
-  await set(ref(db, `users/${uid}`), profile);
+  await set(ref(db, `users/${uid}/profile`), profile);
 };
 
 export const loadUserProfile = async (uid: string) => {
   if (!db) return null;
 
-  const snapshot = await get(ref(db, `users/${uid}`));
-  return snapshot.exists() ? (snapshot.val() as UserProfile) : null;
+  const profileSnapshot = await get(ref(db, `users/${uid}/profile`));
+  if (profileSnapshot.exists()) {
+    return profileSnapshot.val() as UserProfile;
+  }
+
+  const legacySnapshot = await get(ref(db, `users/${uid}`));
+  if (!legacySnapshot.exists()) return null;
+
+  const value = legacySnapshot.val() as Partial<UserProfile>;
+  return Array.isArray(value.addresses) && typeof value.displayName === "string"
+    ? (value as UserProfile)
+    : null;
+};
+
+export const saveActiveUserSession = async (uid: string, sessionId: string) => {
+  if (!db) {
+    throw new Error("Firebase Realtime Database is not configured yet.");
+  }
+
+  await set(ref(db, `users/${uid}/activeSessionId`), sessionId);
+};
+
+export const subscribeActiveUserSession = (
+  uid: string,
+  callback: (sessionId: string | null) => void,
+): Unsubscribe => {
+  if (!db) return () => undefined;
+
+  return onValue(ref(db, `users/${uid}/activeSessionId`), (snapshot) => {
+    const value = snapshot.val();
+    callback(typeof value === "string" ? value : null);
+  });
 };

@@ -14,8 +14,10 @@ import {
   auth,
   hasFirebaseConfig,
   loadUserProfile,
+  saveActiveUserSession,
   saveUserProfile,
   signInWithGoogle,
+  subscribeActiveUserSession,
 } from "@/lib/firebase";
 import type { Address, UserProfile } from "@/types/catalog";
 
@@ -32,6 +34,8 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 const sessionStartedAtKey = "lumes-session-started-at";
+const sessionDeviceIdKey = "lumes-session-device-id";
+const pendingLoginSessionKey = "lumes-pending-login-session";
 const sessionDurationMs = 2 * 24 * 60 * 60 * 1000;
 
 const readSessionStartedAt = () => {
@@ -46,6 +50,25 @@ const startSession = () => {
 
 const clearSession = () => {
   window.localStorage.removeItem(sessionStartedAtKey);
+};
+
+const getDeviceSessionId = () => {
+  const existing = window.localStorage.getItem(sessionDeviceIdKey);
+  if (existing) return existing;
+
+  const next = crypto.randomUUID();
+  window.localStorage.setItem(sessionDeviceIdKey, next);
+  return next;
+};
+
+const markPendingLogin = () => {
+  window.localStorage.setItem(pendingLoginSessionKey, "1");
+};
+
+const consumePendingLogin = () => {
+  const pending = window.localStorage.getItem(pendingLoginSessionKey) === "1";
+  window.localStorage.removeItem(pendingLoginSessionKey);
+  return pending;
 };
 
 const isSessionExpired = (startedAt: number) => Date.now() - startedAt >= sessionDurationMs;
@@ -97,6 +120,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
         if (!startedAt) {
           startSession();
         }
+        if (consumePendingLogin()) {
+          await saveActiveUserSession(nextUser.uid, getDeviceSessionId());
+        }
 
         setUser(nextUser);
         const existingProfile = await loadUserProfile(nextUser.uid);
@@ -123,9 +149,23 @@ export function AuthProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!auth || !user) return;
     const currentAuth = auth;
+    const deviceSessionId = getDeviceSessionId();
+
+    const unsubscribeSession = subscribeActiveUserSession(user.uid, (activeSessionId) => {
+      if (!activeSessionId || activeSessionId === deviceSessionId) return;
+
+      void signOut(currentAuth).then(() => {
+        clearSession();
+        setUser(null);
+        setProfile(null);
+        router.replace("/login?next=/dashboard");
+      });
+    });
 
     const startedAt = readSessionStartedAt();
-    if (!startedAt) return;
+    if (!startedAt) {
+      return unsubscribeSession;
+    }
 
     const remainingMs = sessionDurationMs - (Date.now() - startedAt);
     if (remainingMs <= 0) {
@@ -133,6 +173,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         clearSession();
         router.replace(getExpiredLoginPath());
       });
+      unsubscribeSession();
       return;
     }
 
@@ -143,7 +184,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
       });
     }, remainingMs);
 
-    return () => window.clearTimeout(timeout);
+    return () => {
+      window.clearTimeout(timeout);
+      unsubscribeSession();
+    };
   }, [router, user]);
 
   const value = useMemo<AuthContextValue>(
@@ -153,8 +197,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
       loading,
       authEnabled: hasFirebaseConfig,
       loginWithGoogle: async () => {
-        await signInWithGoogle();
-        startSession();
+        markPendingLogin();
+        try {
+          await signInWithGoogle();
+          startSession();
+          if (auth?.currentUser) {
+            await saveActiveUserSession(auth.currentUser.uid, getDeviceSessionId());
+          }
+        } catch (error) {
+          consumePendingLogin();
+          throw error;
+        }
       },
       logout: async () => {
         if (!auth) return;
