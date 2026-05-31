@@ -66,7 +66,7 @@ export function ProductDetail({ product }: { product: Product }) {
           </div>
           <div className="mt-8 space-y-5">
             <div>
-              <p className="text-sm font-medium text-white">Jersey sizes</p>
+              <p className="text-sm font-medium text-white">Size</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {product.sizes.map((size) => (
                   <button
