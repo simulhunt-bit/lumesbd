@@ -9,7 +9,7 @@ const pages = {
   "track-order": {
     title: "Track Order",
     description: "Check the latest status of your LUMES BD order.",
-    body: "After your order is picked up, we will email your courier tracking ID. Use that tracking ID with our support team to check the latest delivery status.",
+    body: "Follow your order from confirmation to pickup and completion with the same order or tracking ID we sent by email.",
   },
   about: {
     title: "About Us",
@@ -85,12 +85,12 @@ export default async function InfoPage({ params }: PageProps) {
   }
 
   return (
-    <section className="bg-[#f8fbff] py-16 text-zinc-950 sm:py-24">
+    <section className={`${slug === "track-order" ? "bg-[#060c24] text-white" : "bg-[#f8fbff] text-zinc-950"} py-16 sm:py-24`}>
       <Container>
         <div className={`mx-auto ${slug === "track-order" ? "max-w-5xl" : "max-w-3xl"}`}>
-          <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#01aeea]">LUMES BD</p>
-          <h1 className="mt-4 text-4xl font-bold tracking-normal text-zinc-950 sm:text-5xl">{page.title}</h1>
-          <p className="mt-5 text-lg leading-8 text-zinc-600">{page.body}</p>
+          <p className={`text-sm font-bold uppercase tracking-[0.28em] ${slug === "track-order" ? "text-cyan-200" : "text-[#01aeea]"}`}>LUMES BD</p>
+          <h1 className={`mt-4 text-4xl font-bold tracking-normal sm:text-5xl ${slug === "track-order" ? "text-white" : "text-zinc-950"}`}>{page.title}</h1>
+          <p className={`mt-5 text-lg leading-8 ${slug === "track-order" ? "max-w-3xl text-cyan-50/72" : "text-zinc-600"}`}>{page.body}</p>
           {slug === "track-order" && (
             <Suspense fallback={<p className="mt-10 text-sm text-zinc-600">Loading tracking tools...</p>}>
               <TrackOrderView />

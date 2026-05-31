@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { Check, Clock, Loader, PackageCheck, Search, Truck } from "lucide-react";
+import { Check, Clock, Loader, MapPin, PackageCheck, Search, Truck } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
 type TrackingStatus = "confirmed" | "soon_picked_up" | "picked_up" | "picked_up_from_us" | "completed";
@@ -159,28 +159,40 @@ export function TrackOrderView() {
   return (
     <div className="mt-10 space-y-6">
       <form
-        className="rounded-[1.5rem] border border-cyan-100 bg-white p-4 shadow-[0_24px_70px_-54px_rgba(1,197,250,0.35)] sm:p-5"
+        className="overflow-hidden rounded-[1.75rem] border border-cyan-400/15 bg-[#08112d] p-4 shadow-[0_30px_90px_-58px_rgba(1,197,250,0.5)] sm:rounded-[2rem] sm:p-5"
         onSubmit={submit}
       >
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">Order lookup</p>
+            <p className="mt-2 text-sm leading-6 text-cyan-50/68">
+              Enter your order ID, tracking ID, or both to check the latest movement.
+            </p>
+          </div>
+          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-100">
+            <MapPin className="h-4 w-4" aria-hidden="true" />
+            Bangladesh delivery
+          </span>
+        </div>
         <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
           <input
             value={orderId}
             onChange={(event) => setOrderId(event.target.value)}
             placeholder="Order ID"
             aria-label="Order ID"
-            className="min-h-12 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-950 outline-none transition focus:border-cyan-400 focus:bg-white"
+            className="min-h-12 rounded-2xl border border-cyan-300/15 bg-white/95 px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:bg-white"
           />
           <input
             value={trackingId}
             onChange={(event) => setTrackingId(event.target.value)}
             placeholder="Tracking ID"
             aria-label="Tracking ID"
-            className="min-h-12 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-950 outline-none transition focus:border-cyan-400 focus:bg-white"
+            className="min-h-12 rounded-2xl border border-cyan-300/15 bg-white/95 px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:bg-white"
           />
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-zinc-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-cyan-50/40"
           >
             <Search className="h-4 w-4" aria-hidden="true" />
             {loading ? "Loading..." : "Track"}
@@ -189,7 +201,7 @@ export function TrackOrderView() {
       </form>
 
       {message && (
-        <p className="rounded-2xl border border-cyan-100 bg-cyan-50 px-4 py-3 text-sm leading-6 text-cyan-900">{message}</p>
+        <p className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm leading-6 text-cyan-50">{message}</p>
       )}
 
       <div className="space-y-4">
@@ -199,16 +211,16 @@ export function TrackOrderView() {
           return (
             <article
               key={order.orderId}
-              className="overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white shadow-[0_24px_70px_-54px_rgba(24,24,27,0.28)]"
+              className="overflow-hidden rounded-[1.75rem] border border-cyan-400/15 bg-[#08112d] text-white shadow-[0_30px_90px_-58px_rgba(1,197,250,0.5)] sm:rounded-[2rem]"
             >
-              <div className="bg-[#08112d] p-5 text-white sm:p-6">
+              <div className="border-b border-cyan-300/15 bg-[radial-gradient(circle_at_12%_0%,_rgba(1,197,250,0.18),_transparent_34%),linear-gradient(135deg,_#08112d,_#060c24)] p-5 sm:p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">{order.orderId}</p>
                     <h2 className="mt-3 text-2xl font-semibold text-white">{currentStatus.label}</h2>
                     <p className="mt-2 max-w-xl text-sm leading-6 text-cyan-50/72">{currentStatus.description}</p>
                   </div>
-                  <span className="inline-flex w-fit items-center gap-2 rounded-full bg-cyan-300 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-950">
+                  <span className="inline-flex w-fit items-center gap-2 rounded-full bg-cyan-300 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-950 shadow-[0_14px_34px_-22px_rgba(1,197,250,0.8)]">
                     <Clock className="h-3.5 w-3.5" aria-hidden="true" />
                     {currentStatus.label}
                   </span>
@@ -217,17 +229,17 @@ export function TrackOrderView() {
 
               <div className="space-y-6 p-5 sm:p-6">
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Products</p>
-                    <p className="mt-2 text-sm font-medium leading-6 text-zinc-950">{order.productNames.join(", ")}</p>
+                  <div className="rounded-2xl border border-cyan-300/15 bg-white/5 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200/70">Products</p>
+                    <p className="mt-2 text-sm font-medium leading-6 text-white">{order.productNames.join(", ")}</p>
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Tracking ID</p>
-                    <p className="mt-2 text-sm font-semibold text-zinc-950">{order.trackingId ?? "Pending"}</p>
+                  <div className="rounded-2xl border border-cyan-300/15 bg-white/5 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200/70">Tracking ID</p>
+                    <p className="mt-2 text-sm font-semibold text-white">{order.trackingId ?? "Pending"}</p>
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Last update</p>
-                    <p className="mt-2 text-sm font-medium text-zinc-950">{formatDate(order.updatedAt)}</p>
+                  <div className="rounded-2xl border border-cyan-300/15 bg-white/5 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200/70">Last update</p>
+                    <p className="mt-2 text-sm font-medium text-white">{formatDate(order.updatedAt)}</p>
                   </div>
                 </div>
 
@@ -241,13 +253,13 @@ export function TrackOrderView() {
                         key={step.id}
                         className={`rounded-2xl border p-4 transition ${
                           active
-                            ? "border-cyan-200 bg-cyan-50 text-cyan-950"
-                            : "border-zinc-200 bg-zinc-50 text-zinc-500"
+                            ? "border-cyan-300/30 bg-cyan-300/12 text-cyan-50"
+                            : "border-cyan-300/10 bg-white/5 text-cyan-50/45"
                         }`}
                       >
                         <span
                           className={`inline-flex h-10 w-10 items-center justify-center rounded-full ${
-                            active ? "bg-cyan-300 text-slate-950" : "bg-white text-zinc-400"
+                            active ? "bg-cyan-300 text-slate-950" : "bg-white/5 text-cyan-50/45"
                           }`}
                         >
                           <Icon className="h-5 w-5" aria-hidden="true" />
@@ -258,18 +270,18 @@ export function TrackOrderView() {
                   })}
                 </div>
 
-                <div className="grid gap-3 border-t border-zinc-100 pt-5 text-sm sm:grid-cols-3">
-                  <p className="text-zinc-600">
+                <div className="grid gap-3 border-t border-cyan-300/15 pt-5 text-sm sm:grid-cols-3">
+                  <p className="text-cyan-50/55">
                     Confirmed
-                    <span className="mt-1 block font-medium text-zinc-950">{formatDate(order.confirmedAt)}</span>
+                    <span className="mt-1 block font-medium text-white">{formatDate(order.confirmedAt)}</span>
                   </p>
-                  <p className="text-zinc-600">
+                  <p className="text-cyan-50/55">
                     Picked up
-                    <span className="mt-1 block font-medium text-zinc-950">{formatDate(order.pickedUpAt)}</span>
+                    <span className="mt-1 block font-medium text-white">{formatDate(order.pickedUpAt)}</span>
                   </p>
-                  <p className="text-zinc-600">
+                  <p className="text-cyan-50/55">
                     Completed
-                    <span className="mt-1 block font-medium text-zinc-950">{formatDate(order.completedAt)}</span>
+                    <span className="mt-1 block font-medium text-white">{formatDate(order.completedAt)}</span>
                   </p>
                 </div>
               </div>
