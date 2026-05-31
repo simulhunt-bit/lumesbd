@@ -41,7 +41,7 @@ export const metadata: Metadata = {
       },
     ],
     shortcut: "/favicon.png",
-    apple: "/lumes-logo.png",
+    apple: "/favicon.png",
   },
   manifest: "/manifest.json",
   formatDetection: {
