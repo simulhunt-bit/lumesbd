@@ -91,7 +91,7 @@ export const products: Product[] = [
     isNew: true,
     description: "A darker away-kit expression for fans who prefer a sharper, modern look.",
     highlights: ["Soft touch fabric", "Athletic visual lines", "Easy everyday styling"],
-    sizes: ["S", "M", "L", "XL"],
+    sizes: ["3.5 x 3"],
     colors: [
       { name: "Navy", hex: "#1d3557" },
       { name: "Silver", hex: "#d1d5db" },
@@ -271,7 +271,7 @@ export const products: Product[] = [
     gender: "Unisex",
     description: "Green-and-yellow fanwear built to stand out while staying comfortable.",
     highlights: ["Expressive palette", "Soft midweight knit", "Easy fanwear styling"],
-    sizes: ["M", "L", "XL"],
+    sizes: ["3.5 x 3"],
     colors: [
       { name: "Green", hex: "#15803d" },
       { name: "Yellow", hex: "#facc15" },
@@ -295,7 +295,7 @@ export const products: Product[] = [
     gender: "Unisex",
     description: "A strong black-led fanwear piece with classic German flag accents.",
     highlights: ["Strong neutral base", "Comfort fit", "Statement supporter style"],
-    sizes: ["S", "M", "L"],
+    sizes: ["3.5 x 3"],
     colors: [
       { name: "Black", hex: "#111827" },
       { name: "Red", hex: "#dc2626" },

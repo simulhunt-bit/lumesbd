@@ -1,4 +1,4 @@
-export type ProductSize = "S" | "M" | "L" | "XL" | "XXL";
+export type ProductSize = "S" | "M" | "L" | "XL" | "XXL" | "3.5 x 3";
 
 export type ProductColor = {
   name: string;
