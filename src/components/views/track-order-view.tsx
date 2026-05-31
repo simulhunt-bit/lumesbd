@@ -128,12 +128,14 @@ export function TrackOrderView() {
           value={orderId}
           onChange={(event) => setOrderId(event.target.value)}
           placeholder="Order ID"
+          aria-label="Order ID"
           className="rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none transition focus:border-cyan-400"
         />
         <input
           value={trackingId}
           onChange={(event) => setTrackingId(event.target.value)}
           placeholder="Tracking ID"
+          aria-label="Tracking ID"
           className="rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none transition focus:border-cyan-400"
         />
         <button

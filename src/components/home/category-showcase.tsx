@@ -4,22 +4,22 @@ import { Container } from "@/components/shared/container";
 
 const categories = [
   {
-    name: "Jerseys",
-    href: "/catalog/jersey",
-    image: "/assets/products/argentina-home.jpg",
-    alt: "Argentina jersey hanging on a hanger",
+    name: "World Cup 2026",
+    href: "/catalog/jersey/world-cup-2026",
+    image: "/assets/subcategories/world-cup-2026.svg",
+    alt: "World Cup 2026 jersey collection artwork",
   },
   {
-    name: "Hoodies",
-    href: "/catalog?category=hoodies",
-    image: "/assets/categories/hoodies.svg",
-    alt: "Black LUMES BD hoodie",
+    name: "Flag Series",
+    href: "/catalog/jersey/flags",
+    image: "/assets/subcategories/flags.svg",
+    alt: "Flag series fanwear artwork",
   },
   {
-    name: "Accessories",
-    href: "/catalog?category=accessories",
-    image: "/assets/categories/accessories.svg",
-    alt: "LUMES BD caps and accessories",
+    name: "Original Copy",
+    href: "/catalog/jersey/original-copy-jersey",
+    image: "/assets/subcategories/original-copy-jersey.svg",
+    alt: "Original copy jersey collection artwork",
   },
 ];
 

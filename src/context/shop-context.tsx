@@ -54,6 +54,21 @@ const WISHLIST_KEY = "lumes-wishlist";
 
 const buildVariantId = (slug: string, size: string, color: string) => `${slug}|${size}|${color}`;
 
+const readStoredItems = <T,>(key: string): T[] => {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const value = window.localStorage.getItem(key);
+    if (!value) return [];
+
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? (parsed as T[]) : [];
+  } catch {
+    window.localStorage.removeItem(key);
+    return [];
+  }
+};
+
 const trackWishlistDemand = async ({
   product,
   size,
@@ -83,9 +98,7 @@ const trackWishlistDemand = async ({
 export function ShopProvider({ children }: PropsWithChildren) {
   const { user, profile } = useAuth();
   const [cart, setCart] = useState<CartItem[]>(() => {
-    if (typeof window === "undefined") return [];
-    const storedCart = window.localStorage.getItem(CART_KEY);
-    const parsedCart = storedCart ? (JSON.parse(storedCart) as StoredCartItem[]) : [];
+    const parsedCart = readStoredItems<StoredCartItem>(CART_KEY);
 
     return parsedCart.map(({ customization, ...item }) => ({
       ...item,
@@ -93,9 +106,7 @@ export function ShopProvider({ children }: PropsWithChildren) {
     }));
   });
   const [wishlist, setWishlist] = useState<WishlistItem[]>(() => {
-    if (typeof window === "undefined") return [];
-    const storedWishlist = window.localStorage.getItem(WISHLIST_KEY);
-    return storedWishlist ? JSON.parse(storedWishlist) : [];
+    return readStoredItems<WishlistItem>(WISHLIST_KEY);
   });
 
   useEffect(() => {
@@ -118,24 +129,27 @@ export function ShopProvider({ children }: PropsWithChildren) {
         setCart((current) => {
           const existing = current.find((item) => item.id === id);
           if (existing) {
-            return current.map((item) =>
-              item.id === id
-                ? {
-                    ...item,
-                    quantity: item.quantity + 1,
-                    customizations: item.customizations?.length
-                      ? [
-                          ...item.customizations,
-                          {
-                            ...item.customizations[0],
-                            name: "",
-                            number: "",
-                          },
-                        ]
-                      : item.customizations,
-                  }
-                : item,
-            );
+            return current.map((item) => {
+              if (item.id !== id) return item;
+
+              const nextQuantity = Math.min(item.quantity + 1, Math.max(1, product.stock));
+
+              return {
+                ...item,
+                quantity: nextQuantity,
+                customizations:
+                  item.customizations?.length && nextQuantity > item.quantity
+                    ? [
+                        ...item.customizations,
+                        {
+                          ...item.customizations[0],
+                          name: "",
+                          number: "",
+                        },
+                      ]
+                    : item.customizations,
+              };
+            });
           }
 
           return [

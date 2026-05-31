@@ -85,7 +85,7 @@ export function ProductCard({
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#01c5fa] px-4 py-3 text-sm font-semibold text-[#061026] transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-cyan-50/40"
           >
             <ShoppingBag className="h-4 w-4" />
-            Buy Now
+            Choose Options
           </button>
         </div>
       </div>

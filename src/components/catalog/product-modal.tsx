@@ -36,6 +36,17 @@ export function ProductModal({
     return () => window.removeEventListener("keydown", handleEscape);
   }, [open, onClose]);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
   if (!open || !product) return null;
 
   const inStock = product.stock > 0;
@@ -44,14 +55,20 @@ export function ProductModal({
   const canBuySelectedSize = inStock && isPurchasableSize(product, selectedSize);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-zinc-950/60 p-2 backdrop-blur-sm sm:items-center sm:justify-center sm:p-6">
-      <div className="w-full max-w-3xl overflow-hidden rounded-[1.6rem] bg-white shadow-2xl sm:rounded-[2rem]">
+    <div className="fixed inset-0 z-50 flex items-end bg-zinc-950/60 p-2 backdrop-blur-sm sm:items-center sm:justify-center sm:p-6" role="presentation" onMouseDown={onClose}>
+      <div
+        className="w-full max-w-3xl overflow-hidden rounded-[1.6rem] bg-white shadow-2xl sm:rounded-[2rem]"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="product-modal-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-4 sm:px-6">
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-zinc-500">{product.subcategorySlug.replaceAll("-", " ")}</p>
-            <h3 className="mt-1 text-xl font-semibold text-zinc-950">{product.name}</h3>
+            <h3 id="product-modal-title" className="mt-1 text-xl font-semibold text-zinc-950">{product.name}</h3>
           </div>
-          <button type="button" onClick={onClose} className="rounded-full border border-zinc-200 p-2 text-zinc-700">
+          <button type="button" onClick={onClose} className="rounded-full border border-zinc-200 p-2 text-zinc-700" aria-label="Close product details">
             <X className="h-5 w-5" />
           </button>
         </div>

@@ -64,20 +64,28 @@ export function Header() {
           ))}
         </nav>
         <div className="hidden items-center gap-3 md:flex">
-          <Link href="/wishlist" className="relative rounded-full border border-cyan-400/20 p-3 text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa]">
+          <Link
+            href="/wishlist"
+            className="relative rounded-full border border-cyan-400/20 p-3 text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa]"
+            aria-label="Wishlist"
+          >
             <Heart className="h-5 w-5" />
             {wishlistCount > 0 && <span className="absolute -right-1 -top-1 rounded-full bg-orange-500 px-1.5 text-[10px] font-semibold text-white">{wishlistCount}</span>}
           </Link>
-          <Link href="/cart" className="relative rounded-full border border-cyan-400/20 p-3 text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa]">
+          <Link
+            href="/cart"
+            className="relative rounded-full border border-cyan-400/20 p-3 text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa]"
+            aria-label="Cart"
+          >
             <ShoppingBag className="h-5 w-5" />
             {cartCount > 0 && <span className="absolute -right-1 -top-1 rounded-full bg-zinc-950 px-1.5 text-[10px] font-semibold text-white">{cartCount}</span>}
           </Link>
           <Link
             href={user ? "/dashboard" : "/login"}
-              className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-cyan-400/20 text-sm font-medium text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa]"
-              aria-label={user ? "Account dashboard" : "Login"}
-            >
-              <User2 className="h-4 w-4" />
+            className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-cyan-400/20 text-sm font-medium text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa]"
+            aria-label={user ? "Account dashboard" : "Login"}
+          >
+            <User2 className="h-4 w-4" />
           </Link>
         </div>
         <button
