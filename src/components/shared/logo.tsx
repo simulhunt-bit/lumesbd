@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { brand } from "@/content/brand";
 
 export function Logo() {
@@ -8,8 +9,15 @@ export function Logo() {
       className="inline-flex items-center gap-2 text-left transition hover:opacity-80"
       title="LUMES BD"
     >
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-300/10 text-lg font-black leading-none text-white">
-        L
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-300/10">
+        <Image
+          src="/lumes-image-placeholder.png"
+          alt=""
+          width={28}
+          height={22}
+          priority
+          className="h-auto w-7"
+        />
       </span>
       <span className="flex min-w-0 flex-col leading-none">
         <span className="text-lg font-black tracking-normal text-white sm:text-xl">{brand.name}</span>
