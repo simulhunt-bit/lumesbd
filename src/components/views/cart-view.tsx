@@ -8,7 +8,7 @@ import { useAuth } from "@/context/auth-context";
 import { LocationSelects } from "@/components/shared/location-selects";
 import { SmartImage } from "@/components/shared/smart-image";
 import { getProducts } from "@/lib/catalog";
-import { formatPrice, deliveryChargeForWeight, VAT_CHARGE } from "@/lib/utils";
+import { formatPrice, deliveryChargeForWeight } from "@/lib/utils";
 import { COD_PAYMENT_METHOD, type CheckoutOrder } from "@/lib/orders";
 
 type CartItem = {
@@ -69,8 +69,7 @@ export function CartView() {
     [address.fullName, address.district, address.thana].filter(Boolean).join(" - ");
 
   const deliveryCharge = deliveryChargeForWeight(selectedDistrict, totalItems);
-  const vatCharge = VAT_CHARGE;
-  const grandTotal = total + deliveryCharge + vatCharge;
+  const grandTotal = total + deliveryCharge;
   const deliveryWeightText = `${Math.max(1, Math.ceil(totalItems / 3))}KG`;
   const canSubmitOrder =
     cartProducts.length > 0 &&
@@ -109,7 +108,7 @@ export function CartView() {
       })),
       subtotal: total,
       deliveryCharge,
-      vat: vatCharge,
+      vat: 0,
       grandTotal,
       paymentMethod: COD_PAYMENT_METHOD,
       createdAt: "pending",
@@ -338,10 +337,6 @@ export function CartView() {
             <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
               <span>Delivery weight</span>
               <span className="text-right font-medium text-white">{selectedDistrict ? deliveryWeightText : "Choose address"}</span>
-            </div>
-            <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
-              <span>VAT</span>
-              <span className="text-right font-medium text-white">{formatPrice(vatCharge)}</span>
             </div>
             <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
               <span>Total</span>

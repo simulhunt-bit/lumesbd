@@ -85,7 +85,6 @@ const totalsBlock = (order: CheckoutOrder) => `
   <table style="width:100%;margin-top:18px;border-collapse:collapse;font-family:Arial,sans-serif;">
     <tr><td style="padding:6px 0;color:#52525b;">Subtotal</td><td style="padding:6px 0;text-align:right;">${escapeHtml(formatOrderPrice(order.subtotal))}</td></tr>
     <tr><td style="padding:6px 0;color:#52525b;">Delivery charge</td><td style="padding:6px 0;text-align:right;">${escapeHtml(formatOrderPrice(order.deliveryCharge))}</td></tr>
-    <tr><td style="padding:6px 0;color:#52525b;">VAT</td><td style="padding:6px 0;text-align:right;">${escapeHtml(formatOrderPrice(order.vat))}</td></tr>
     <tr><td style="padding:10px 0;font-weight:700;border-top:1px solid #d4d4d8;">Grand total</td><td style="padding:10px 0;text-align:right;font-weight:700;border-top:1px solid #d4d4d8;">${escapeHtml(formatOrderPrice(order.grandTotal))}</td></tr>
   </table>
 `;
@@ -136,7 +135,6 @@ const orderText = (order: CheckoutOrder) => [
   ),
   `Subtotal: ${formatOrderPrice(order.subtotal)}`,
   `Delivery charge: ${formatOrderPrice(order.deliveryCharge)}`,
-  `VAT: ${formatOrderPrice(order.vat)}`,
   `Grand total: ${formatOrderPrice(order.grandTotal)}`,
 ].join("\n");
 
