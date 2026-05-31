@@ -1,8 +1,8 @@
 export const ADMIN_EMAIL = "lumesbd@gmail.com";
 export const COD_PAYMENT_METHOD = "Cash on Delivery";
 export const CUSTOMIZATION_PRICES = {
-  standard: 70,
-  premium: 150,
+  standard: 50,
+  premium: 100,
 } as const;
 
 export type CustomizationType = keyof typeof CUSTOMIZATION_PRICES;
