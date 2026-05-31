@@ -7,7 +7,7 @@ import {
   uniqueEmails,
 } from "@/lib/orders";
 
-type OrderAction = "confirm" | "cancel";
+type OrderAction = "confirm" | "cancel" | "tracking" | "complete";
 
 const escapeHtml = (value: string | number) =>
   String(value)
@@ -198,6 +198,97 @@ export const sendOrderStatusEmail = async (
     subject: title,
     text: `${intro}\n\n${orderText(order)}`,
     html: emailShell(title, `<p>${escapeHtml(intro)}</p>${orderDetailsHtml(order)}`),
+  });
+};
+
+export const sendAdminTrackingRequestEmail = async (order: CheckoutOrder, origin: string) => {
+  const trackingUrl = createActionUrl(origin, order, "tracking");
+  const html = emailShell(
+    `Add tracking for ${order.orderId}`,
+    `
+      <p>The order is confirmed. Add the courier tracking ID once the order is picked up.</p>
+      ${orderDetailsHtml(order)}
+      <div style="margin-top:24px;">
+        <a href="${escapeHtml(trackingUrl)}" style="display:inline-block;border-radius:999px;background:#18181b;color:#ffffff;padding:12px 18px;text-decoration:none;font-weight:700;">Add Tracking ID</a>
+      </div>
+    `,
+  );
+
+  await createTransport().sendMail({
+    from: fromAddress(),
+    to: ADMIN_EMAIL,
+    subject: `Add tracking ID for ${order.orderId}`,
+    text: `${orderText(order)}\n\nAdd Tracking ID: ${trackingUrl}`,
+    html,
+  });
+};
+
+export const sendOrderPickedUpEmail = async (order: CheckoutOrder, origin: string) => {
+  const trackingUrl = new URL("/track-order", origin);
+  trackingUrl.searchParams.set("orderId", order.orderId);
+  if (order.trackingId) {
+    trackingUrl.searchParams.set("trackingId", order.trackingId);
+  }
+
+  const intro = `Your Cash on Delivery order has been picked up by the courier.`;
+
+  await createTransport().sendMail({
+    from: fromAddress(),
+    to: uniqueEmails([order.customerEmail, ADMIN_EMAIL]),
+    subject: `Order picked up ${order.orderId}`,
+    text: [
+      intro,
+      "",
+      orderText(order),
+      `Tracking ID: ${order.trackingId ?? "Pending"}`,
+      `Track Order: ${trackingUrl.toString()}`,
+    ].join("\n"),
+    html: emailShell(
+      `Order picked up ${order.orderId}`,
+      `
+        <p>${escapeHtml(intro)}</p>
+        <p><strong>Tracking ID:</strong> ${escapeHtml(order.trackingId ?? "Pending")}</p>
+        <p><a href="${escapeHtml(trackingUrl.toString())}" style="color:#0891b2;font-weight:700;">Track your order</a></p>
+        ${orderDetailsHtml(order)}
+      `,
+    ),
+  });
+};
+
+export const sendAdminCompletionRequestEmail = async (order: CheckoutOrder, origin: string) => {
+  const completeUrl = createActionUrl(origin, order, "complete");
+  const html = emailShell(
+    `Complete order ${order.orderId}`,
+    `
+      <p>The customer has been notified with tracking details.</p>
+      <p><strong>Tracking ID:</strong> ${escapeHtml(order.trackingId ?? "Pending")}</p>
+      <div style="margin-top:24px;">
+        <a href="${escapeHtml(completeUrl)}" style="display:inline-block;border-radius:999px;background:#16a34a;color:#ffffff;padding:12px 18px;text-decoration:none;font-weight:700;">Order Completed</a>
+      </div>
+    `,
+  );
+
+  await createTransport().sendMail({
+    from: fromAddress(),
+    to: ADMIN_EMAIL,
+    subject: `Mark order completed ${order.orderId}`,
+    text: `${orderText(order)}\n\nTracking ID: ${order.trackingId ?? "Pending"}\nOrder Completed: ${completeUrl}`,
+    html,
+  });
+};
+
+export const sendOrderCompletedEmail = async (order: CheckoutOrder) => {
+  const intro = "Thank you for your order. Your LUMES BD order has been completed.";
+
+  await createTransport().sendMail({
+    from: fromAddress(),
+    to: uniqueEmails([order.customerEmail, ADMIN_EMAIL]),
+    subject: `Order completed ${order.orderId}`,
+    text: `${intro}\n\n${orderText(order)}`,
+    html: emailShell(
+      `Order completed ${order.orderId}`,
+      `<p>${escapeHtml(intro)}</p><p>We appreciate you shopping with LUMES BD.</p>${orderDetailsHtml(order)}`,
+    ),
   });
 };
 

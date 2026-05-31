@@ -40,6 +40,9 @@ export type CheckoutOrder = {
   grandTotal: number;
   paymentMethod: typeof COD_PAYMENT_METHOD;
   createdAt: string;
+  trackingId?: string;
+  pickedUpAt?: string;
+  completedAt?: string;
 };
 
 export const normalizeEmail = (email: string) => email.trim().toLowerCase();

@@ -7,7 +7,7 @@ const pages = {
   "track-order": {
     title: "Track Order",
     description: "Check the latest status of your LUMES BD order.",
-    body: "Send your order number or phone number to our support team and we will confirm the latest delivery status for you.",
+    body: "After your order is picked up, we will email your courier tracking ID. Use that tracking ID with our support team to check the latest delivery status.",
   },
   about: {
     title: "About Us",
