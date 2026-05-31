@@ -23,7 +23,7 @@ type CartItem = {
   quantity: number;
   size: string;
   color: string;
-  customization?: JerseyCustomization;
+  customizations?: JerseyCustomization[];
 };
 
 type CartProduct = {
@@ -37,7 +37,7 @@ export function CartView() {
     addToCart,
     clearCart,
     removeFromCart,
-    updateCartCustomization,
+    updateCartCustomizations,
     updateCartQuantity,
   } = useShop();
   const { profile } = useAuth();
@@ -59,10 +59,13 @@ export function CartView() {
     })
     .filter(Boolean) as CartProduct[];
 
-  const total = cartProducts.reduce((sum, entry) => {
-    const customizationPrice = entry.item.customization?.price ?? 0;
-    return sum + (entry.product.price + customizationPrice) * entry.item.quantity;
-  }, 0);
+  const total = cartProducts.reduce(
+    (sum, entry) =>
+      sum +
+      entry.product.price * entry.item.quantity +
+      (entry.item.customizations?.reduce((customizationSum, customization) => customizationSum + customization.price, 0) ?? 0),
+    0,
+  );
   const totalItems = cartProducts.reduce((sum, entry) => sum + entry.item.quantity, 0);
   const deliveryItemCount = chargeableDeliveryItemCount(
     cartProducts.map(({ item, product }) => ({
@@ -131,9 +134,14 @@ export function CartView() {
   const canSubmitOrder =
     cartProducts.length > 0 &&
     cartProducts.every(({ item }) => {
-      if (!item.customization) return true;
+      if (!item.customizations?.length) return true;
 
-      return item.customization.name.trim() && item.customization.number.trim();
+      return (
+        item.customizations.length === item.quantity &&
+        item.customizations.every(
+          (customization) => customization.name.trim() && customization.number.trim(),
+        )
+      );
     }) &&
     activeCheckoutDetails.customerName.trim() &&
     activeCheckoutDetails.customerPhone.trim() &&
@@ -146,26 +154,54 @@ export function CartView() {
     setCheckoutDetails((current) => ({ ...current, [field]: value }));
   };
 
-  const updateCustomization = (
-    itemId: string,
+  const buildCustomizations = (
+    quantity: number,
     type: CustomizationType,
-    field?: "name" | "number",
-    value = "",
+    currentCustomizations: JerseyCustomization[] = [],
+  ) =>
+    Array.from({ length: quantity }, (_, index) => {
+      const currentCustomization = currentCustomizations[index];
+
+      return {
+        type,
+        name: currentCustomization?.type === type ? currentCustomization.name : "",
+        number: currentCustomization?.type === type ? currentCustomization.number : "",
+        price: CUSTOMIZATION_PRICES[type],
+      };
+    });
+
+  const updateCustomizationType = (item: CartItem, type: CustomizationType) => {
+    updateCartCustomizations(item.id, buildCustomizations(item.quantity, type, item.customizations));
+  };
+
+  const updateCustomizationField = (
+    item: CartItem,
+    index: number,
+    field: "name" | "number",
+    value: string,
   ) => {
-    const item = cart.find((entry) => entry.id === itemId);
-    const currentCustomization = item?.customization;
-    const customization = {
-      type,
-      name: currentCustomization?.type === type ? currentCustomization.name : "",
-      number: currentCustomization?.type === type ? currentCustomization.number : "",
-      price: CUSTOMIZATION_PRICES[type],
+    const type = item.customizations?.[0]?.type;
+    if (!type) return;
+
+    const customizations = buildCustomizations(item.quantity, type, item.customizations);
+    customizations[index] = {
+      ...customizations[index],
+      [field]: value,
     };
+    updateCartCustomizations(item.id, customizations);
+  };
 
-    if (field) {
-      customization[field] = value;
+  const updateItemQuantity = (item: CartItem, quantity: number, maxQuantity: number) => {
+    const safeMaxQuantity = Math.max(1, maxQuantity);
+    const safeQuantity = Number.isFinite(quantity) ? quantity : 1;
+    const nextQuantity = Math.min(Math.max(1, Math.floor(safeQuantity)), safeMaxQuantity);
+
+    updateCartQuantity(item.id, nextQuantity, maxQuantity);
+
+    const type = item.customizations?.[0]?.type;
+    if (type) {
+      updateCartCustomizations(item.id, buildCustomizations(nextQuantity, type, item.customizations));
     }
-
-    updateCartCustomization(itemId, customization);
   };
 
   const submitOrder = async (event: FormEvent<HTMLFormElement>) => {
@@ -187,9 +223,11 @@ export function CartView() {
         size: item.size,
         color: item.color,
         quantity: item.quantity,
-        unitPrice: product.price + (item.customization?.price ?? 0),
-        customization: item.customization,
-        lineTotal: (product.price + (item.customization?.price ?? 0)) * item.quantity,
+        unitPrice: product.price,
+        customizations: item.customizations,
+        lineTotal:
+          product.price * item.quantity +
+          (item.customizations?.reduce((sum, customization) => sum + customization.price, 0) ?? 0),
       })),
       subtotal: total,
       deliveryCharge,
@@ -263,6 +301,9 @@ export function CartView() {
                 product.subcategorySlug === "flags" && matchingJerseyCount > 0
                   ? Math.min(product.stock, matchingJerseyCount)
                   : product.stock;
+              const customizationTotal =
+                item.customizations?.reduce((sum, customization) => sum + customization.price, 0) ?? 0;
+              const selectedCustomizationType = item.customizations?.[0]?.type;
 
               return (
               <article
@@ -292,13 +333,13 @@ export function CartView() {
                   </div>
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <p className="text-lg font-semibold text-cyan-100">
-                      {formatPrice((product.price + (item.customization?.price ?? 0)) * item.quantity)}
+                      {formatPrice(product.price * item.quantity + customizationTotal)}
                     </p>
                     <div className="flex w-full flex-col gap-3 min-[420px]:flex-row sm:w-auto sm:items-center">
                       <div className="inline-flex h-11 w-full items-center overflow-hidden rounded-full border border-white/10 bg-white/5 min-[420px]:w-auto">
                         <button
                           type="button"
-                          onClick={() => updateCartQuantity(item.id, item.quantity - 1, maxCartQuantity)}
+                          onClick={() => updateItemQuantity(item, item.quantity - 1, maxCartQuantity)}
                           disabled={item.quantity <= 1}
                           className="flex h-full flex-1 items-center justify-center text-lg text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-slate-600 min-[420px]:w-10 min-[420px]:flex-none"
                           aria-label={`Decrease ${product.name} quantity`}
@@ -310,13 +351,13 @@ export function CartView() {
                           min={1}
                           max={Math.max(1, maxCartQuantity)}
                           value={item.quantity}
-                          onChange={(event) => updateCartQuantity(item.id, Number(event.target.value), maxCartQuantity)}
+                          onChange={(event) => updateItemQuantity(item, Number(event.target.value), maxCartQuantity)}
                           className="h-full w-14 border-x border-white/10 bg-transparent text-center text-sm font-semibold text-white outline-none"
                           aria-label={`${product.name} quantity`}
                         />
                         <button
                           type="button"
-                          onClick={() => updateCartQuantity(item.id, item.quantity + 1, maxCartQuantity)}
+                          onClick={() => updateItemQuantity(item, item.quantity + 1, maxCartQuantity)}
                           disabled={item.quantity >= maxCartQuantity}
                           className="flex h-full flex-1 items-center justify-center text-lg text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-slate-600 min-[420px]:w-10 min-[420px]:flex-none"
                           aria-label={`Increase ${product.name} quantity`}
@@ -339,14 +380,14 @@ export function CartView() {
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <p className="text-sm font-semibold text-white">Name & number</p>
-                          <p className="text-xs text-slate-400">One customization per jersey line.</p>
+                          <p className="text-xs text-slate-400">Each jersey piece gets its own print details.</p>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           <button
                             type="button"
-                            onClick={() => updateCartCustomization(item.id)}
+                            onClick={() => updateCartCustomizations(item.id)}
                             className={`rounded-full px-3 py-2 text-xs font-semibold transition ${
-                              !item.customization
+                              !item.customizations?.length
                                 ? "bg-white text-slate-950"
                                 : "border border-white/10 text-slate-300 hover:bg-white/10"
                             }`}
@@ -357,9 +398,9 @@ export function CartView() {
                             <button
                               key={type}
                               type="button"
-                              onClick={() => updateCustomization(item.id, type)}
+                              onClick={() => updateCustomizationType(item, type)}
                               className={`rounded-full px-3 py-2 text-xs font-semibold capitalize transition ${
-                                item.customization?.type === type
+                                selectedCustomizationType === type
                                   ? "bg-cyan-300 text-slate-950"
                                   : "border border-cyan-300/20 text-cyan-100 hover:bg-cyan-300/10"
                               }`}
@@ -369,35 +410,44 @@ export function CartView() {
                           ))}
                         </div>
                       </div>
-                      {item.customization && (
-                        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                          <label className="block text-xs font-medium text-slate-300">
-                            Name
-                            <input
-                              value={item.customization.name}
-                              onChange={(event) =>
-                                updateCustomization(item.id, item.customization!.type, "name", event.target.value)
-                              }
-                              required
-                              maxLength={18}
-                              className="mt-2 w-full rounded-xl border border-white/10 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-cyan-400"
-                              placeholder="MESSI"
-                            />
-                          </label>
-                          <label className="block text-xs font-medium text-slate-300">
-                            Number
-                            <input
-                              value={item.customization.number}
-                              onChange={(event) =>
-                                updateCustomization(item.id, item.customization!.type, "number", event.target.value)
-                              }
-                              required
-                              inputMode="numeric"
-                              maxLength={3}
-                              className="mt-2 w-full rounded-xl border border-white/10 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-cyan-400"
-                              placeholder="10"
-                            />
-                          </label>
+                      {item.customizations?.length && (
+                        <div className="mt-3 space-y-3">
+                          {item.customizations.map((customization, index) => (
+                            <div key={index} className="rounded-xl border border-white/10 p-3">
+                              <p className="text-xs font-semibold text-cyan-100">
+                                Jersey {index + 1} {formatPrice(customization.price)}
+                              </p>
+                              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                                <label className="block text-xs font-medium text-slate-300">
+                                  Name
+                                  <input
+                                    value={customization.name}
+                                    onChange={(event) =>
+                                      updateCustomizationField(item, index, "name", event.target.value)
+                                    }
+                                    required
+                                    maxLength={18}
+                                    className="mt-2 w-full rounded-xl border border-white/10 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-cyan-400"
+                                    placeholder="MESSI"
+                                  />
+                                </label>
+                                <label className="block text-xs font-medium text-slate-300">
+                                  Number
+                                  <input
+                                    value={customization.number}
+                                    onChange={(event) =>
+                                      updateCustomizationField(item, index, "number", event.target.value)
+                                    }
+                                    required
+                                    inputMode="numeric"
+                                    maxLength={3}
+                                    className="mt-2 w-full rounded-xl border border-white/10 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-cyan-400"
+                                    placeholder="10"
+                                  />
+                                </label>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>

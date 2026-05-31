@@ -17,6 +17,10 @@ type CartItem = {
   quantity: number;
   size: string;
   color: string;
+  customizations?: JerseyCustomization[];
+};
+
+type StoredCartItem = CartItem & {
   customization?: JerseyCustomization;
 };
 
@@ -32,7 +36,7 @@ type ShopContextValue = {
   wishlist: WishlistItem[];
   addToCart: (product: Product, variant?: { size: string; color: string }) => void;
   addToWishlist: (product: Product, variant?: { size: string; color: string }) => void;
-  updateCartCustomization: (id: string, customization?: JerseyCustomization) => void;
+  updateCartCustomizations: (id: string, customizations?: JerseyCustomization[]) => void;
   updateCartQuantity: (id: string, quantity: number, maxQuantity?: number) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
@@ -52,7 +56,12 @@ export function ShopProvider({ children }: PropsWithChildren) {
   const [cart, setCart] = useState<CartItem[]>(() => {
     if (typeof window === "undefined") return [];
     const storedCart = window.localStorage.getItem(CART_KEY);
-    return storedCart ? JSON.parse(storedCart) : [];
+    const parsedCart = storedCart ? (JSON.parse(storedCart) as StoredCartItem[]) : [];
+
+    return parsedCart.map(({ customization, ...item }) => ({
+      ...item,
+      customizations: item.customizations ?? (customization ? [customization] : undefined),
+    }));
   });
   const [wishlist, setWishlist] = useState<WishlistItem[]>(() => {
     if (typeof window === "undefined") return [];
@@ -81,7 +90,22 @@ export function ShopProvider({ children }: PropsWithChildren) {
           const existing = current.find((item) => item.id === id);
           if (existing) {
             return current.map((item) =>
-              item.id === id ? { ...item, quantity: item.quantity + 1 } : item,
+              item.id === id
+                ? {
+                    ...item,
+                    quantity: item.quantity + 1,
+                    customizations: item.customizations?.length
+                      ? [
+                          ...item.customizations,
+                          {
+                            ...item.customizations[0],
+                            name: "",
+                            number: "",
+                          },
+                        ]
+                      : item.customizations,
+                  }
+                : item,
             );
           }
 
@@ -127,9 +151,9 @@ export function ShopProvider({ children }: PropsWithChildren) {
           current.map((item) => (item.id === id ? { ...item, quantity: nextQuantity } : item)),
         );
       },
-      updateCartCustomization: (id, customization) =>
+      updateCartCustomizations: (id, customizations) =>
         setCart((current) =>
-          current.map((item) => (item.id === id ? { ...item, customization } : item)),
+          current.map((item) => (item.id === id ? { ...item, customizations } : item)),
         ),
       removeFromCart: (id) => setCart((current) => current.filter((item) => item.id !== id)),
       clearCart: () => setCart([]),

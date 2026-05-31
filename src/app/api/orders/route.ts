@@ -66,43 +66,55 @@ export async function POST(req: Request) {
       }
 
       const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
-      const customization = item.customization;
+      const customizations = item.customizations ?? [];
 
       if (quantity > product.stock) {
         throw new Error(`${product.name} has only ${product.stock} available.`);
       }
 
-      if (customization && product.subcategorySlug === "flags") {
+      if (customizations.length > quantity) {
+        throw new Error(`${product.name} customization quantity cannot exceed ordered quantity.`);
+      }
+
+      if (customizations.length > 0 && customizations.length !== quantity) {
+        throw new Error(`${product.name} requires one customization for each jersey piece.`);
+      }
+
+      if (customizations.length > 0 && product.subcategorySlug === "flags") {
         throw new Error("Flag add-ons cannot be customized.");
       }
 
-      const normalizedCustomization = customization
-        ? {
+      const normalizedCustomizations = customizations.map((customization) => {
+        const normalizedCustomization = {
             type: customization.type,
             name: customization.name.trim().toUpperCase(),
             number: customization.number.trim(),
             price: CUSTOMIZATION_PRICES[customization.type as CustomizationType],
-          }
-        : undefined;
+        };
 
-      if (
-        normalizedCustomization &&
-        (!normalizedCustomization.price ||
-          !normalizedCustomization.name ||
-          !normalizedCustomization.number)
-      ) {
-        throw new Error(`${product.name} customization requires a type, name, and number.`);
-      }
+        if (
+          !normalizedCustomization.price ||
+            !normalizedCustomization.name ||
+            !normalizedCustomization.number
+        ) {
+          throw new Error(`${product.name} customization requires a type, name, and number.`);
+        }
 
-      if (normalizedCustomization && !/^[\p{L}\p{N} .'-]{1,18}$/u.test(normalizedCustomization.name)) {
-        throw new Error(`${product.name} customization name can use up to 18 letters or numbers.`);
-      }
+        if (!/^[\p{L}\p{N} .'-]{1,18}$/u.test(normalizedCustomization.name)) {
+          throw new Error(`${product.name} customization name can use up to 18 letters or numbers.`);
+        }
 
-      if (normalizedCustomization && !/^\d{1,3}$/.test(normalizedCustomization.number)) {
-        throw new Error(`${product.name} customization number must be 1 to 3 digits.`);
-      }
+        if (!/^\d{1,3}$/.test(normalizedCustomization.number)) {
+          throw new Error(`${product.name} customization number must be 1 to 3 digits.`);
+        }
 
-      const unitPrice = product.price + (normalizedCustomization?.price ?? 0);
+        return normalizedCustomization;
+      });
+
+      const customizationTotal = normalizedCustomizations.reduce(
+        (sum, customization) => sum + customization.price,
+        0,
+      );
 
       return {
         productSlug: product.slug,
@@ -111,9 +123,9 @@ export async function POST(req: Request) {
         size: item.size,
         color: item.color,
         quantity,
-        unitPrice,
-        customization: normalizedCustomization,
-        lineTotal: unitPrice * quantity,
+        unitPrice: product.price,
+        customizations: normalizedCustomizations.length ? normalizedCustomizations : undefined,
+        lineTotal: product.price * quantity + customizationTotal,
       };
     });
     const flagItems = items.filter((item) => item.subcategorySlug === "flags");

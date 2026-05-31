@@ -71,8 +71,13 @@ const orderRows = (order: CheckoutOrder) =>
   order.items
     .map(
       (item) => {
-        const customization = item.customization
-          ? `<div style="margin-top:4px;color:#52525b;font-size:12px;">${escapeHtml(item.customization.type)} print: ${escapeHtml(item.customization.name)} #${escapeHtml(item.customization.number)} (${escapeHtml(formatOrderPrice(item.customization.price))}/pc)</div>`
+        const customization = item.customizations?.length
+          ? `<div style="margin-top:4px;color:#52525b;font-size:12px;">${item.customizations
+              .map(
+                (entry, index) =>
+                  `Jersey ${index + 1}: ${escapeHtml(entry.type)} print ${escapeHtml(entry.name)} #${escapeHtml(entry.number)} (${escapeHtml(formatOrderPrice(entry.price))})`,
+              )
+              .join("<br />")}</div>`
           : "";
 
         return `
@@ -137,8 +142,13 @@ const orderText = (order: CheckoutOrder) => [
   "Ordered products:",
   ...order.items.map(
     (item) => {
-      const customization = item.customization
-        ? ` | ${item.customization.type} print: ${item.customization.name} #${item.customization.number} (${formatOrderPrice(item.customization.price)}/pc)`
+      const customization = item.customizations?.length
+        ? ` | ${item.customizations
+            .map(
+              (entry, index) =>
+                `Jersey ${index + 1}: ${entry.type} print ${entry.name} #${entry.number} (${formatOrderPrice(entry.price)})`,
+            )
+            .join("; ")}`
         : "";
 
       return `- ${item.productName} | Size: ${item.size} | Qty: ${item.quantity}${customization} | ${formatOrderPrice(item.lineTotal)}`;

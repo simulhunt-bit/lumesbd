@@ -21,7 +21,7 @@ export type CheckoutOrderItem = {
   color: string;
   quantity: number;
   unitPrice: number;
-  customization?: JerseyCustomization;
+  customizations?: JerseyCustomization[];
   lineTotal: number;
 };
 
