@@ -16,13 +16,9 @@ export function ProductCard({
   variant?: { size: string };
 }) {
   const router = useRouter();
-  const { addToCart, addToWishlist, removeFromWishlist, wishlist } = useShop();
+  const { addToWishlist, removeFromWishlist, wishlist } = useShop();
   const savedItem = wishlist.find((item) => item.slug === product.slug);
   const isSaved = Boolean(savedItem);
-  const buyNowVariant = {
-    size: variant?.size ?? product.sizes[0] ?? "",
-    color: product.colors[0]?.name ?? "",
-  };
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-[1.8rem] border border-cyan-400/16 bg-[#08112d] shadow-[0_26px_80px_-58px_rgba(1,197,250,0.52)] transition duration-300 hover:-translate-y-1 hover:border-cyan-300/35 hover:shadow-[0_34px_90px_-54px_rgba(1,197,250,0.62)]">
@@ -84,8 +80,7 @@ export function ProductCard({
             type="button"
             disabled={product.stock <= 0}
             onClick={() => {
-              addToCart(product, buyNowVariant);
-              router.push("/cart");
+              router.push(`/products/${product.slug}`);
             }}
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#01c5fa] px-4 py-3 text-sm font-semibold text-[#061026] transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-cyan-50/40"
           >

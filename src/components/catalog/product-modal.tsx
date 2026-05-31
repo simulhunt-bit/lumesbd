@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useShop } from "@/context/shop-context";
 import { SmartImage } from "@/components/shared/smart-image";
+import { defaultPurchasableSize, isPurchasableSize } from "@/lib/product-availability";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/catalog";
 
@@ -38,8 +39,9 @@ export function ProductModal({
   if (!open || !product) return null;
 
   const inStock = product.stock > 0;
-  const selectedSize = selectedVariant?.slug === product.slug ? selectedVariant.size : product.sizes[0] ?? "";
+  const selectedSize = selectedVariant?.slug === product.slug ? selectedVariant.size : defaultPurchasableSize(product);
   const defaultColor = product.colors[0]?.name ?? "";
+  const canBuySelectedSize = inStock && isPurchasableSize(product, selectedSize);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-zinc-950/60 p-2 backdrop-blur-sm sm:items-center sm:justify-center sm:p-6">
@@ -85,7 +87,7 @@ export function ProductModal({
             </div>
             <p className="mt-5 text-sm leading-7 text-zinc-600">{product.description}</p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {inStock ? (
+              {canBuySelectedSize ? (
                 <>
                   <button
                     type="button"

@@ -5,15 +5,17 @@ import { Check, Heart, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 import { useState } from "react";
 import { useShop } from "@/context/shop-context";
 import { SmartImage } from "@/components/shared/smart-image";
+import { defaultPurchasableSize, isPurchasableSize } from "@/lib/product-availability";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/catalog";
 
 export function ProductDetail({ product }: { product: Product }) {
   const router = useRouter();
   const [activeImage, setActiveImage] = useState(product.images[0]);
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0] ?? "");
+  const [selectedSize, setSelectedSize] = useState(defaultPurchasableSize(product));
   const defaultColor = product.colors[0]?.name ?? "";
   const { addToCart, addToWishlist } = useShop();
+  const canBuySelectedSize = product.stock > 0 && isPurchasableSize(product, selectedSize);
 
   return (
     <section className="py-6 sm:py-12">
@@ -110,7 +112,7 @@ export function ProductDetail({ product }: { product: Product }) {
             </div>
           </div>
           <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            {product.stock > 0 ? (
+            {canBuySelectedSize ? (
               <>
                 <button
                   type="button"
