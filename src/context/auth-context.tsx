@@ -8,6 +8,7 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
+import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import {
   auth,
@@ -30,18 +31,74 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+const sessionStartedAtKey = "lumes-session-started-at";
+const sessionDurationMs = 2 * 24 * 60 * 60 * 1000;
+
+const readSessionStartedAt = () => {
+  const value = window.localStorage.getItem(sessionStartedAtKey);
+  const startedAt = value ? Number(value) : NaN;
+  return Number.isFinite(startedAt) ? startedAt : null;
+};
+
+const startSession = () => {
+  window.localStorage.setItem(sessionStartedAtKey, String(Date.now()));
+};
+
+const clearSession = () => {
+  window.localStorage.removeItem(sessionStartedAtKey);
+};
+
+const isSessionExpired = (startedAt: number) => Date.now() - startedAt >= sessionDurationMs;
+
+const getSafeNextPath = () => {
+  const path = `${window.location.pathname}${window.location.search}`;
+  if (!path || path === "/login") return "/dashboard";
+
+  if (window.location.pathname === "/login") {
+    const nextPath = new URLSearchParams(window.location.search).get("next");
+    return nextPath?.startsWith("/") && !nextPath.startsWith("//") ? nextPath : "/dashboard";
+  }
+
+  return path;
+};
+
+const getExpiredLoginPath = () => {
+  const params = new URLSearchParams({
+    expired: "1",
+    next: getSafeNextPath(),
+  });
+
+  return `/login?${params.toString()}`;
+};
 
 export function AuthProvider({ children }: PropsWithChildren) {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(hasFirebaseConfig);
 
   useEffect(() => {
     if (!auth) return;
+    const currentAuth = auth;
 
-    return onAuthStateChanged(auth, async (nextUser) => {
-      setUser(nextUser);
+    return onAuthStateChanged(currentAuth, async (nextUser) => {
       if (nextUser) {
+        const startedAt = readSessionStartedAt();
+        if (startedAt && isSessionExpired(startedAt)) {
+          clearSession();
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+          await signOut(currentAuth);
+          router.replace(getExpiredLoginPath());
+          return;
+        }
+
+        if (!startedAt) {
+          startSession();
+        }
+
+        setUser(nextUser);
         const existingProfile = await loadUserProfile(nextUser.uid);
         const fallbackProfile: UserProfile = existingProfile ?? {
           displayName: nextUser.displayName ?? "LUMES Customer",
@@ -55,11 +112,39 @@ export function AuthProvider({ children }: PropsWithChildren) {
           await saveUserProfile(nextUser.uid, fallbackProfile);
         }
       } else {
+        clearSession();
+        setUser(null);
         setProfile(null);
       }
       setLoading(false);
     });
-  }, []);
+  }, [router]);
+
+  useEffect(() => {
+    if (!auth || !user) return;
+    const currentAuth = auth;
+
+    const startedAt = readSessionStartedAt();
+    if (!startedAt) return;
+
+    const remainingMs = sessionDurationMs - (Date.now() - startedAt);
+    if (remainingMs <= 0) {
+      void signOut(currentAuth).then(() => {
+        clearSession();
+        router.replace(getExpiredLoginPath());
+      });
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      void signOut(currentAuth).then(() => {
+        clearSession();
+        router.replace(getExpiredLoginPath());
+      });
+    }, remainingMs);
+
+    return () => window.clearTimeout(timeout);
+  }, [router, user]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -69,9 +154,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
       authEnabled: hasFirebaseConfig,
       loginWithGoogle: async () => {
         await signInWithGoogle();
+        startSession();
       },
       logout: async () => {
         if (!auth) return;
+        clearSession();
         await signOut(auth);
       },
       saveProfilePhoto: async (file) => {

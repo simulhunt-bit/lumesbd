@@ -17,10 +17,19 @@ export const metadata: Metadata = buildMetadata({
   ]),
 });
 
-export default function LoginPage() {
+const getSafeRedirectPath = (nextPath?: string) =>
+  nextPath?.startsWith("/") && !nextPath.startsWith("//") ? nextPath : "/dashboard";
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ expired?: string; next?: string }>;
+}) {
+  const { expired, next } = await searchParams;
+
   return (
     <Container className="py-12">
-      <LoginPanel />
+      <LoginPanel redirectPath={getSafeRedirectPath(next)} sessionExpired={expired === "1"} />
     </Container>
   );
 }

@@ -6,12 +6,13 @@ import { ArrowRight, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { Logo } from "@/components/shared/logo";
 
-const getRedirectPath = () => {
-  const nextPath = new URLSearchParams(window.location.search).get("next");
-  return nextPath?.startsWith("/") && !nextPath.startsWith("//") ? nextPath : "/dashboard";
-};
-
-export function LoginPanel() {
+export function LoginPanel({
+  redirectPath = "/dashboard",
+  sessionExpired = false,
+}: {
+  redirectPath?: string;
+  sessionExpired?: boolean;
+}) {
   const router = useRouter();
   const { authEnabled, loginWithGoogle, user } = useAuth();
   const [error, setError] = useState("");
@@ -19,16 +20,16 @@ export function LoginPanel() {
 
   useEffect(() => {
     if (user) {
-      router.replace(getRedirectPath());
+      router.replace(redirectPath);
     }
-  }, [router, user]);
+  }, [redirectPath, router, user]);
 
   const handleGoogle = async () => {
     try {
       setLoading(true);
       setError("");
       await loginWithGoogle();
-      router.push(getRedirectPath());
+      router.push(redirectPath);
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Could not log in with Google.");
     } finally {
@@ -72,6 +73,11 @@ export function LoginPanel() {
             <p className="mt-3 text-sm leading-7 text-zinc-600">
               Use Google sign-in to access your LUMES BD profile. We use it only for account access and saved shopping details.
             </p>
+            {sessionExpired && (
+              <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-800">
+                Your session expired. Please log in again.
+              </div>
+            )}
 
             <button
               type="button"
