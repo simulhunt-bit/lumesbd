@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { CollectionSection } from "@/components/catalog/collection-section";
 import { ProductDetail } from "@/components/product/product-detail";
-import { StoryStrip } from "@/components/product/story-strip";
 import { Container } from "@/components/shared/container";
 import { getProducts, getProductBySlug, getRecommendedProducts } from "@/lib/catalog";
 
@@ -19,7 +18,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   return (
     <Container>
       <ProductDetail product={product} />
-      <StoryStrip story={product.story} />
       <CollectionSection
         eyebrow="Recommended"
         title="More from this category"
