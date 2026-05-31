@@ -14,11 +14,39 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
   const { cartCount, wishlistCount } = useShop();
+  const mobileNavigation = navigation.filter((item) => item.href !== "/dashboard");
 
   return (
     <header className="sticky top-0 z-40 border-b border-cyan-500/20 bg-[rgba(6,12,36,0.86)] backdrop-blur-xl">
-      <Container className="flex min-h-[68px] items-center justify-between gap-4 sm:min-h-[76px]">
-        <Logo />
+      <Container className="flex min-h-[68px] items-center justify-between gap-2 sm:min-h-[76px] sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Logo />
+          <div className="flex items-center gap-1.5 md:hidden">
+            <Link
+              href="/wishlist"
+              className="relative rounded-full border border-cyan-400/20 p-2 text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa]"
+              aria-label="Wishlist"
+            >
+              <Heart className="h-4 w-4" />
+              {wishlistCount > 0 && <span className="absolute -right-1 -top-1 rounded-full bg-orange-500 px-1.5 text-[10px] font-semibold text-white">{wishlistCount}</span>}
+            </Link>
+            <Link
+              href="/cart"
+              className="relative rounded-full border border-cyan-400/20 p-2 text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa]"
+              aria-label="Cart"
+            >
+              <ShoppingBag className="h-4 w-4" />
+              {cartCount > 0 && <span className="absolute -right-1 -top-1 rounded-full bg-zinc-950 px-1.5 text-[10px] font-semibold text-white">{cartCount}</span>}
+            </Link>
+            <Link
+              href={user ? "/dashboard" : "/login"}
+              className="rounded-full border border-cyan-400/20 p-2 text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa]"
+              aria-label={user ? "Account dashboard" : "Login"}
+            >
+              <User2 className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
         <nav className="hidden items-center gap-8 lg:flex">
           {navigation.map((item) => (
             <Link key={item.href} href={item.href} className="text-sm font-medium text-cyan-100/78 transition hover:text-[#01c5fa]">
@@ -45,31 +73,22 @@ export function Header() {
         </div>
         <button
           type="button"
-          className="inline-flex rounded-full border border-cyan-400/20 p-3 text-cyan-100/78 md:hidden"
+          className="inline-flex rounded-full border border-cyan-400/20 p-2 text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa] md:hidden"
           onClick={() => setOpen((value) => !value)}
           aria-label="Toggle menu"
+          aria-expanded={open}
+          aria-controls="mobile-navigation"
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </Container>
-      <div className={cn("border-t border-cyan-500/20 bg-[#08112d] md:hidden", open ? "block" : "hidden")}>
+      <div id="mobile-navigation" className={cn("border-t border-cyan-500/20 bg-[#08112d] md:hidden", open ? "block" : "hidden")}>
         <Container className="flex flex-col gap-5 py-5">
-          {navigation.map((item) => (
+          {mobileNavigation.map((item) => (
             <Link key={item.href} href={item.href} className="text-sm font-medium text-cyan-100/78" onClick={() => setOpen(false)}>
               {item.label}
             </Link>
           ))}
-          <div className="flex items-center gap-3 pt-2">
-            <Link href="/wishlist" className="rounded-full border border-cyan-400/20 p-3 text-cyan-100/78" onClick={() => setOpen(false)}>
-              <Heart className="h-5 w-5" />
-            </Link>
-            <Link href="/cart" className="rounded-full border border-cyan-400/20 p-3 text-cyan-100/78" onClick={() => setOpen(false)}>
-              <ShoppingBag className="h-5 w-5" />
-            </Link>
-            <Link href={user ? "/dashboard" : "/login"} className="flex-1 rounded-full border border-cyan-400/20 px-5 py-3 text-center text-sm font-medium text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa]" onClick={() => setOpen(false)}>
-              {user ? "Dashboard" : "Login"}
-            </Link>
-          </div>
         </Container>
       </div>
     </header>

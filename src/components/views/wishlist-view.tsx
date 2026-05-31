@@ -50,7 +50,7 @@ export function WishlistView() {
             <ProductCard
               key={item.id}
               product={product}
-              variant={{ size: item.size, color: item.color }}
+              variant={{ size: item.size }}
             />
           ))}
         </div>

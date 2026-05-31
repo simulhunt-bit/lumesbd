@@ -74,7 +74,6 @@ const orderRows = (order: CheckoutOrder) =>
         <tr>
           <td style="padding:10px;border-bottom:1px solid #e4e4e7;">${escapeHtml(item.productName)}</td>
           <td style="padding:10px;border-bottom:1px solid #e4e4e7;">${escapeHtml(item.size)}</td>
-          <td style="padding:10px;border-bottom:1px solid #e4e4e7;">${escapeHtml(item.color)}</td>
           <td style="padding:10px;border-bottom:1px solid #e4e4e7;text-align:center;">${escapeHtml(item.quantity)}</td>
           <td style="padding:10px;border-bottom:1px solid #e4e4e7;text-align:right;">${escapeHtml(formatOrderPrice(item.lineTotal))}</td>
         </tr>
@@ -104,7 +103,6 @@ const orderDetailsHtml = (order: CheckoutOrder) => `
       <tr style="background:#f4f4f5;">
         <th style="padding:10px;text-align:left;">Ordered products</th>
         <th style="padding:10px;text-align:left;">Size</th>
-        <th style="padding:10px;text-align:left;">Color</th>
         <th style="padding:10px;text-align:center;">Quantity</th>
         <th style="padding:10px;text-align:right;">Total</th>
       </tr>
@@ -134,7 +132,7 @@ const orderText = (order: CheckoutOrder) => [
   "Ordered products:",
   ...order.items.map(
     (item) =>
-      `- ${item.productName} | Size: ${item.size} | Color: ${item.color} | Qty: ${item.quantity} | ${formatOrderPrice(item.lineTotal)}`,
+      `- ${item.productName} | Size: ${item.size} | Qty: ${item.quantity} | ${formatOrderPrice(item.lineTotal)}`,
   ),
   `Subtotal: ${formatOrderPrice(order.subtotal)}`,
   `Delivery charge: ${formatOrderPrice(order.deliveryCharge)}`,

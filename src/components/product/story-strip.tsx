@@ -6,8 +6,7 @@ export function StoryStrip({ story }: { story: StorySlide[] }) {
     <section className="py-8">
       <div className="rounded-[1.6rem] border border-zinc-200 bg-white p-5 sm:rounded-[2rem] sm:p-8">
         <div className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-orange-600">Quality Story</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-zinc-950 sm:text-3xl">Material, finish, and styling details</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-zinc-950 sm:text-3xl">Material, finish, and styling details</h2>
           <p className="mt-4 text-base leading-7 text-zinc-600">A closer look at the fabric, finishing, and everyday styling details that make each LUMES piece feel ready beyond matchday.</p>
         </div>
         <div className="mt-6 flex snap-x gap-4 overflow-x-auto pb-3 sm:mt-8 sm:gap-5">

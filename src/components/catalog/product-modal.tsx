@@ -22,7 +22,6 @@ export function ProductModal({
   const [selectedVariant, setSelectedVariant] = useState<{
     slug: string;
     size: string;
-    color: string;
   } | null>(null);
 
   useEffect(() => {
@@ -40,7 +39,7 @@ export function ProductModal({
 
   const inStock = product.stock > 0;
   const selectedSize = selectedVariant?.slug === product.slug ? selectedVariant.size : product.sizes[0] ?? "";
-  const selectedColor = selectedVariant?.slug === product.slug ? selectedVariant.color : product.colors[0]?.name ?? "";
+  const defaultColor = product.colors[0]?.name ?? "";
 
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-zinc-950/60 p-2 backdrop-blur-sm sm:items-center sm:justify-center sm:p-6">
@@ -72,7 +71,7 @@ export function ProductModal({
                   <button
                     key={size}
                     type="button"
-                    onClick={() => setSelectedVariant({ slug: product.slug, size, color: selectedColor })}
+                    onClick={() => setSelectedVariant({ slug: product.slug, size })}
                     className={`rounded-full border px-3 py-2 text-sm font-medium transition ${
                       selectedSize === size
                         ? "border-zinc-950 bg-zinc-950 text-white"
@@ -84,26 +83,6 @@ export function ProductModal({
                 ))}
               </div>
             </div>
-            <div className="mt-5">
-              <p className="text-sm font-medium text-zinc-950">Choose color</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {product.colors.map((color) => (
-                  <button
-                    key={color.name}
-                    type="button"
-                    onClick={() => setSelectedVariant({ slug: product.slug, size: selectedSize, color: color.name })}
-                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition ${
-                      selectedColor === color.name
-                        ? "border-zinc-950 bg-zinc-950 text-white"
-                        : "border-zinc-200 text-zinc-700 hover:border-zinc-950"
-                    }`}
-                  >
-                    <span className="h-4 w-4 rounded-full border border-zinc-200" style={{ backgroundColor: color.hex }} />
-                    {color.name}
-                  </button>
-                ))}
-              </div>
-            </div>
             <p className="mt-5 text-sm leading-7 text-zinc-600">{product.description}</p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {inStock ? (
@@ -111,7 +90,7 @@ export function ProductModal({
                   <button
                     type="button"
                     onClick={() => {
-                      addToCart(product, { size: selectedSize, color: selectedColor });
+                      addToCart(product, { size: selectedSize, color: defaultColor });
                       onClose();
                     }}
                     className="rounded-full border border-zinc-200 px-5 py-3 text-sm font-medium text-zinc-900 transition hover:border-zinc-300"
@@ -121,7 +100,7 @@ export function ProductModal({
                   <button
                     type="button"
                     onClick={() => {
-                      addToCart(product, { size: selectedSize, color: selectedColor });
+                      addToCart(product, { size: selectedSize, color: defaultColor });
                       onClose();
                       router.push("/cart");
                     }}
@@ -134,7 +113,7 @@ export function ProductModal({
                 <button
                   type="button"
                   onClick={() => {
-                    addToWishlist(product, { size: selectedSize, color: selectedColor });
+                    addToWishlist(product, { size: selectedSize, color: defaultColor });
                     onClose();
                   }}
                   className="rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 sm:col-span-2"

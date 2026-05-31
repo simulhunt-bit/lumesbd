@@ -13,7 +13,7 @@ export function ProductCard({
   variant,
 }: {
   product: Product;
-  variant?: { size: string; color: string };
+  variant?: { size: string };
 }) {
   const router = useRouter();
   const { addToCart, addToWishlist, removeFromWishlist, wishlist } = useShop();
@@ -21,7 +21,7 @@ export function ProductCard({
   const isSaved = Boolean(savedItem);
   const buyNowVariant = {
     size: variant?.size ?? product.sizes[0] ?? "",
-    color: variant?.color ?? product.colors[0]?.name ?? "",
+    color: product.colors[0]?.name ?? "",
   };
 
   return (
@@ -61,7 +61,6 @@ export function ProductCard({
             {variant ? (
               <div className="mt-3 flex flex-wrap gap-2 text-xs text-cyan-50/76">
                 <span className="rounded-full border border-cyan-200/14 bg-white/5 px-3 py-1.5">Size: {variant.size}</span>
-                <span className="rounded-full border border-cyan-200/14 bg-white/5 px-3 py-1.5">Color: {variant.color}</span>
               </div>
             ) : null}
           </div>

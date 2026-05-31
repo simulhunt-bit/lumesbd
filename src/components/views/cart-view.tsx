@@ -192,9 +192,6 @@ export function CartView() {
                       <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1">
                         Size {item.size}
                       </span>
-                      <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1">
-                        {item.color}
-                      </span>
                     </div>
                     <p className="mt-3 text-xs text-slate-400 sm:text-sm">
                       {product.stock > 0 ? `${product.stock} pieces available` : "Currently out of stock"}

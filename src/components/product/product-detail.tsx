@@ -12,7 +12,7 @@ export function ProductDetail({ product }: { product: Product }) {
   const router = useRouter();
   const [activeImage, setActiveImage] = useState(product.images[0]);
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] ?? "");
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]?.name ?? "");
+  const defaultColor = product.colors[0]?.name ?? "";
   const { addToCart, addToWishlist } = useShop();
 
   return (
@@ -47,26 +47,6 @@ export function ProductDetail({ product }: { product: Product }) {
           </p>
           <p className="mt-5 text-sm leading-7 text-zinc-600 sm:mt-6 sm:text-base sm:leading-8">{product.description}</p>
           <div className="mt-8 space-y-5">
-            <div>
-              <p className="text-sm font-medium text-zinc-950">Available colors</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {product.colors.map((color) => (
-                  <button
-                    key={color.name}
-                    type="button"
-                    onClick={() => setSelectedColor(color.name)}
-                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition ${
-                      selectedColor === color.name
-                        ? "border-zinc-950 bg-zinc-950 text-white"
-                        : "border-zinc-200 text-zinc-700 hover:border-zinc-950"
-                    }`}
-                  >
-                    <span className="h-4 w-4 rounded-full border border-zinc-200" style={{ backgroundColor: color.hex }} />
-                    {color.name}
-                  </button>
-                ))}
-              </div>
-            </div>
             <div>
               <p className="text-sm font-medium text-zinc-950">Jersey sizes</p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -105,7 +85,7 @@ export function ProductDetail({ product }: { product: Product }) {
               <>
                 <button
                   type="button"
-                  onClick={() => addToCart(product, { size: selectedSize, color: selectedColor })}
+                  onClick={() => addToCart(product, { size: selectedSize, color: defaultColor })}
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 px-5 py-3 text-sm font-medium text-zinc-950 transition hover:border-zinc-300"
                 >
                   <ShoppingBag className="h-4 w-4" />
@@ -114,7 +94,7 @@ export function ProductDetail({ product }: { product: Product }) {
                 <button
                   type="button"
                   onClick={() => {
-                    addToCart(product, { size: selectedSize, color: selectedColor });
+                    addToCart(product, { size: selectedSize, color: defaultColor });
                     router.push("/cart");
                   }}
                   className="inline-flex items-center justify-center rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800"
@@ -125,7 +105,7 @@ export function ProductDetail({ product }: { product: Product }) {
             ) : (
               <button
                 type="button"
-                onClick={() => addToWishlist(product, { size: selectedSize, color: selectedColor })}
+                onClick={() => addToWishlist(product, { size: selectedSize, color: defaultColor })}
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 sm:col-span-2"
               >
                 <Heart className="h-4 w-4" />
