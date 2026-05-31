@@ -7,6 +7,7 @@ import {
   sendOrderPickedUpEmail,
   sendOrderStatusEmail,
 } from "@/lib/email";
+import { buildTrackingRecord, saveOrderTrackingRecord } from "@/lib/order-tracking";
 import { validateCheckoutOrder } from "@/lib/orders";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 
@@ -76,6 +77,7 @@ export async function GET(req: Request) {
 
     if (action === "complete") {
       const completedOrder = { ...order, completedAt: new Date().toISOString() };
+      await saveOrderTrackingRecord(buildTrackingRecord(completedOrder, "completed"));
       await sendOrderCompletedEmail(completedOrder);
 
       return renderActionPage("Order completed", `${order.orderId} has been completed. Thank-you email sent to the customer.`);
@@ -85,6 +87,7 @@ export async function GET(req: Request) {
     await sendOrderStatusEmail(order, status);
 
     if (action === "confirm") {
+      await saveOrderTrackingRecord(buildTrackingRecord(order, "confirmed"));
       await sendAdminTrackingRequestEmail(order, new URL(req.url).origin);
     }
 
@@ -130,6 +133,7 @@ export async function POST(req: Request) {
       pickedUpAt: new Date().toISOString(),
     };
     const origin = new URL(req.url).origin;
+    await saveOrderTrackingRecord(buildTrackingRecord(pickedUpOrder, "picked_up"));
     await sendOrderPickedUpEmail(pickedUpOrder, origin);
     await sendAdminCompletionRequestEmail(pickedUpOrder, origin);
 

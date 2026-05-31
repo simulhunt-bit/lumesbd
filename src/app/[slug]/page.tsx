@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { Container } from "@/components/shared/container";
+import { TrackOrderView } from "@/components/views/track-order-view";
 import { buildMetadata } from "@/lib/seo";
 
 const pages = {
@@ -89,6 +91,11 @@ export default async function InfoPage({ params }: PageProps) {
           <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#01aeea]">LUMES BD</p>
           <h1 className="mt-4 text-4xl font-bold tracking-normal text-zinc-950 sm:text-5xl">{page.title}</h1>
           <p className="mt-5 text-lg leading-8 text-zinc-600">{page.body}</p>
+          {slug === "track-order" && (
+            <Suspense fallback={<p className="mt-10 text-sm text-zinc-600">Loading tracking tools...</p>}>
+              <TrackOrderView />
+            </Suspense>
+          )}
         </div>
       </Container>
     </section>
