@@ -29,7 +29,7 @@ export function ProductDetail({ product }: { product: Product }) {
                 {product.badge}
               </span>
             ) : null}
-            <PlayerEditionBadge className={`absolute left-4 z-10 ${product.badge ? "top-14" : "top-4"}`} />
+            <PlayerEditionBadge className="absolute bottom-4 left-4 z-10 max-w-[calc(100%-2rem)]" />
           </div>
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {product.images.map((image) => (
@@ -50,7 +50,7 @@ export function ProductDetail({ product }: { product: Product }) {
         <div className="rounded-[1.5rem] border border-cyan-400/16 bg-[#08112d] p-5 shadow-[0_26px_80px_-58px_rgba(1,197,250,0.52)] sm:rounded-[2rem] sm:p-8">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200/58 sm:tracking-[0.28em]">{product.subcategorySlug.replaceAll("-", " ")}</p>
-            <PlayerEditionBadge />
+            <PlayerEditionBadge variant="inline" />
           </div>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">{product.name}</h1>
           <div className="mt-4 flex flex-wrap items-end gap-3">
