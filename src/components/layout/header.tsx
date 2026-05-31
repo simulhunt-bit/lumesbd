@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Heart, Menu, ShoppingBag, User2, X } from "lucide-react";
 import { useState } from "react";
 import { navigation } from "@/content/brand";
@@ -12,6 +13,7 @@ import { Logo } from "@/components/shared/logo";
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
   const { user } = useAuth();
   const { cartCount, wishlistCount } = useShop();
   const primaryNavigation = navigation.filter((item) => item.href !== "/dashboard");
@@ -49,7 +51,14 @@ export function Header() {
         </div>
         <nav className="hidden items-center gap-8 lg:flex">
           {primaryNavigation.map((item) => (
-            <Link key={item.href} href={item.href} className="text-sm font-medium text-cyan-100/78 transition hover:text-[#01c5fa]">
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "text-sm font-semibold text-cyan-100/78 transition hover:text-[#01c5fa]",
+                pathname === item.href && "text-[#01c5fa]",
+              )}
+            >
               {item.label}
             </Link>
           ))}
@@ -65,14 +74,10 @@ export function Header() {
           </Link>
           <Link
             href={user ? "/dashboard" : "/login"}
-            className={cn(
-              "inline-flex items-center justify-center rounded-full border border-cyan-400/20 text-sm font-medium text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa]",
-              user ? "h-12 w-12" : "gap-2 px-5 py-3",
-            )}
-            aria-label={user ? "Account dashboard" : "Login"}
-          >
-            <User2 className="h-4 w-4" />
-            {!user && "Login"}
+              className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-cyan-400/20 text-sm font-medium text-cyan-100/78 transition hover:border-cyan-400/50 hover:text-[#01c5fa]"
+              aria-label={user ? "Account dashboard" : "Login"}
+            >
+              <User2 className="h-4 w-4" />
           </Link>
         </div>
         <button
@@ -89,7 +94,12 @@ export function Header() {
       <div id="mobile-navigation" className={cn("border-t border-cyan-500/20 bg-[#08112d] md:hidden", open ? "block" : "hidden")}>
         <Container className="flex flex-col gap-5 py-5">
           {primaryNavigation.map((item) => (
-            <Link key={item.href} href={item.href} className="text-sm font-medium text-cyan-100/78" onClick={() => setOpen(false)}>
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn("text-sm font-medium text-cyan-100/78", pathname === item.href && "text-[#01c5fa]")}
+              onClick={() => setOpen(false)}
+            >
               {item.label}
             </Link>
           ))}
