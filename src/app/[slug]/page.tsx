@@ -5,7 +5,14 @@ import { Container } from "@/components/shared/container";
 import { TrackOrderView } from "@/components/views/track-order-view";
 import { buildMetadata } from "@/lib/seo";
 
-const pages = {
+type InfoPageContent = {
+  title: string;
+  description: string;
+  body: string;
+  sections?: Array<{ title: string; body: string }>;
+};
+
+const pages: Record<string, InfoPageContent> = {
   "track-order": {
     title: "Track Order",
     description: "Check the latest status of your LUMES BD order.",
@@ -35,6 +42,12 @@ const pages = {
     title: "Return & Refund",
     description: "LUMES BD return and refund policy.",
     body: "Eligible items can be returned within 7 days when they are unused, unworn, and in original condition.",
+    sections: [
+      {
+        title: "Customized jerseys",
+        body: "Jerseys with a custom name, number, or personalized printing are made to order and cannot be returned or refunded unless the product arrives damaged, defective, or the customization does not match the details submitted by the customer.",
+      },
+    ],
   },
   terms: {
     title: "Terms & Conditions",
@@ -51,7 +64,7 @@ const pages = {
     description: "Frequently asked LUMES BD questions.",
     body: "For quick help, contact support with your product name, size question, order number, or delivery area.",
   },
-} satisfies Record<string, { title: string; description: string; body: string }>;
+};
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -91,6 +104,16 @@ export default async function InfoPage({ params }: PageProps) {
           <p className={`text-sm font-bold uppercase tracking-[0.28em] ${slug === "track-order" ? "text-cyan-200" : "text-[#01aeea]"}`}>LUMES BD</p>
           <h1 className={`mt-4 text-4xl font-bold tracking-normal sm:text-5xl ${slug === "track-order" ? "text-white" : "text-zinc-950"}`}>{page.title}</h1>
           <p className={`mt-5 text-lg leading-8 ${slug === "track-order" ? "max-w-3xl text-cyan-50/72" : "text-zinc-600"}`}>{page.body}</p>
+          {page.sections?.length ? (
+            <div className="mt-8 space-y-4">
+              {page.sections.map((section) => (
+                <section key={section.title} className="rounded-[1.5rem] border border-zinc-200 bg-white p-5 shadow-[0_24px_70px_-54px_rgba(24,24,27,0.28)] sm:p-6">
+                  <h2 className="text-2xl font-semibold text-zinc-950">{section.title}</h2>
+                  <p className="mt-3 text-base leading-8 text-zinc-600">{section.body}</p>
+                </section>
+              ))}
+            </div>
+          ) : null}
           {slug === "track-order" && (
             <Suspense fallback={<p className="mt-10 text-sm text-zinc-600">Loading tracking tools...</p>}>
               <TrackOrderView />
