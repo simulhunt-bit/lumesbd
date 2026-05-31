@@ -107,7 +107,6 @@ export function Footer() {
         {/* Bottom Section */}
         <div className="flex flex-col items-center justify-between gap-4 text-center text-xs text-cyan-100/50 md:flex-row md:text-left">
           <p>&copy; {new Date().getFullYear()} LUMES BD. All rights reserved.</p>
-          <p>Premium Fashion for Every Style</p>
         </div>
       </Container>
     </footer>
