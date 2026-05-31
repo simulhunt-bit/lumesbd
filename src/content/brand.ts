@@ -17,8 +17,6 @@ export const navigation: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/catalog" },
   { label: "Jersey", href: "/catalog/jersey" },
-  { label: "New In", href: "/catalog/new" },
-  { label: "Premium", href: "/catalog/premium" },
   { label: "Dashboard", href: "/dashboard" },
 ];
 
