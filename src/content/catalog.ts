@@ -91,7 +91,7 @@ export const products: Product[] = [
     isNew: true,
     description: "A darker away-kit expression for fans who prefer a sharper, modern look.",
     highlights: ["Soft touch fabric", "Athletic visual lines", "Easy everyday styling"],
-    sizes: ["3.5 x 3"],
+    sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
       { name: "Navy", hex: "#1d3557" },
       { name: "Silver", hex: "#d1d5db" },
@@ -118,7 +118,7 @@ export const products: Product[] = [
     isPremium: true,
     description: "The iconic yellow home kit reworked for a sharper, premium supporter wardrobe.",
     highlights: ["Bright team color", "Comfort knit", "Premium badge application"],
-    sizes: ["M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
       { name: "Brazil Yellow", hex: "#facc15" },
       { name: "Green", hex: "#15803d" },
@@ -144,7 +144,7 @@ export const products: Product[] = [
     isNew: true,
     description: "A sleek away design for supporters who want a cooler palette and premium cut.",
     highlights: ["Modern away tone", "Smooth hand feel", "Collector-friendly finish"],
-    sizes: ["S", "M", "L", "XL"],
+    sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
       { name: "Royal Blue", hex: "#1d4ed8" },
       { name: "Green", hex: "#166534" },
@@ -169,7 +169,7 @@ export const products: Product[] = [
     featured: true,
     description: "A crisp monochrome-forward Germany home jersey with refined trim detailing.",
     highlights: ["Minimal premium design", "Breathable build", "Versatile styling"],
-    sizes: ["S", "M", "L", "XL"],
+    sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
       { name: "White", hex: "#f9fafb" },
       { name: "Black", hex: "#111827" },
@@ -195,7 +195,7 @@ export const products: Product[] = [
     isPremium: true,
     description: "Deep red tones and premium visual balance make this a standout Portugal piece.",
     highlights: ["Rich color saturation", "Soft breathable body", "Matchday-to-street styling"],
-    sizes: ["M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
       { name: "Crimson", hex: "#991b1b" },
       { name: "Green", hex: "#166534" },
@@ -221,7 +221,7 @@ export const products: Product[] = [
     isNew: true,
     description: "A bold red supporter jersey with sharp contrast elements for modern styling.",
     highlights: ["Balanced fit", "Strong color depth", "Comfort-first fabrication"],
-    sizes: ["S", "M", "L", "XL"],
+    sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
       { name: "Red", hex: "#b91c1c" },
       { name: "Navy", hex: "#1e3a8a" },
@@ -247,7 +247,7 @@ export const products: Product[] = [
     featured: true,
     description: "Flag-inspired fanwear piece with bold color blocking and lightweight comfort.",
     highlights: ["Casual supporter piece", "Soft knit", "Easy layering"],
-    sizes: ["S", "M", "L", "XL"],
+    sizes: ["3.5 x 3"],
     colors: [
       { name: "Sky Blue", hex: "#7dd3fc" },
       { name: "White", hex: "#ffffff" },
@@ -322,7 +322,7 @@ export const products: Product[] = [
     isPremium: true,
     description: "Higher-finish Argentina replica with upgraded detailing, trims, and premium hand feel.",
     highlights: ["Premium copy finish", "Enhanced detailing", "Collector-tier feel"],
-    sizes: ["M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
       { name: "Sky Blue", hex: "#7dd3fc" },
       { name: "White", hex: "#ffffff" },
@@ -350,7 +350,7 @@ export const products: Product[] = [
     isPremium: true,
     description: "Premium-finish Brazil replica with elevated trims and a more refined visual texture.",
     highlights: ["Collector-grade presentation", "Enhanced badge finish", "Premium supporter fit"],
-    sizes: ["M", "L", "XL", "XXL"],
+    sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
       { name: "Brazil Yellow", hex: "#facc15" },
       { name: "Green", hex: "#15803d" },
