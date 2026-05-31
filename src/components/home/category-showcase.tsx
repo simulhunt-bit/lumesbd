@@ -7,19 +7,19 @@ const categories = [
     name: "World Cup 2026",
     href: "/catalog/jersey/world-cup-2026",
     image: "/assets/subcategories/world-cup-2026.svg",
-    alt: "World Cup 2026 jersey collection artwork",
+    alt: "World Cup 2026 football jersey collection for Bangladesh fans",
   },
   {
     name: "Flag Series",
     href: "/catalog/jersey/flags",
     image: "/assets/subcategories/flags.svg",
-    alt: "Flag series fanwear artwork",
+    alt: "Flag jersey fanwear collection with Bangladesh delivery",
   },
   {
     name: "Original Copy",
     href: "/catalog/jersey/original-copy-jersey",
     image: "/assets/subcategories/original-copy-jersey.svg",
-    alt: "Original copy jersey collection artwork",
+    alt: "Premium original copy jersey collection in Bangladesh",
   },
 ];
 

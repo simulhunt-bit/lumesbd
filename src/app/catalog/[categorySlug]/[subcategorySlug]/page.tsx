@@ -32,8 +32,8 @@ export async function generateMetadata({
   const products = getProductsBySubcategory(subcategory.slug);
 
   return buildMetadata({
-    title: `${subcategory.name} | LUMES BD`,
-    description: subcategory.description,
+    title: `${subcategory.name} Jerseys Bangladesh | LUMES BD`,
+    description: `Buy ${subcategory.name.toLowerCase()} jerseys from LUMES BD with premium fabric, quality checks, and delivery across Bangladesh.`,
     path: `/catalog/${categorySlug}/${subcategory.slug}`,
     image: subcategory.coverImage,
     pageKeywords: keywords([
@@ -41,6 +41,10 @@ export async function generateMetadata({
       `${subcategory.name} Bangladesh`,
       `${subcategory.name} online`,
       `${subcategory.name} price BD`,
+      `buy ${subcategory.name.toLowerCase()} Bangladesh`,
+      `${subcategory.name} jersey Dhaka`,
+      `${subcategory.name} delivery Bangladesh`,
+      `premium ${subcategory.name.toLowerCase()} jersey`,
       ...products.map((product) => product.name),
       ...products.map((product) => product.shortName),
     ]),
@@ -56,5 +60,11 @@ export default async function SubcategoryPage({
   const subcategory = getSubcategoryBySlug(categorySlug, subcategorySlug);
   if (!subcategory) notFound();
 
-  return <CatalogShell title={subcategory.name} description={subcategory.description} products={getProductsBySubcategory(subcategory.slug)} />;
+  return (
+    <CatalogShell
+      title={subcategory.name}
+      description={`Find ${subcategory.name.toLowerCase()} styles for matchday, gifting, and everyday fanwear with delivery throughout Bangladesh.`}
+      products={getProductsBySubcategory(subcategory.slug)}
+    />
+  );
 }

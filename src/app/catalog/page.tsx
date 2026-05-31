@@ -4,8 +4,8 @@ import { getProducts } from "@/lib/catalog";
 import { buildMetadata, keywords } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "All Products | LUMES BD",
-  description: "Browse every LUMES BD jersey, flag series item, and premium original copy football jersey in one catalog.",
+  title: "Football Jersey Catalog Bangladesh | LUMES BD",
+  description: "Browse all LUMES BD football jerseys, flag fanwear, and premium original copy jerseys with Bangladesh delivery.",
   path: "/catalog",
   pageKeywords: keywords([
     "all LUMES products",
@@ -13,6 +13,11 @@ export const metadata: Metadata = buildMetadata({
     "football jersey catalog",
     "premium fanwear catalog",
     "shop jerseys online",
+    "buy jersey online Bangladesh",
+    "football jersey price BD",
+    "Argentina Brazil jersey BD",
+    "World Cup jersey catalog",
+    "original copy jersey catalog BD",
   ]),
 });
 
@@ -20,7 +25,7 @@ export default function CatalogPage() {
   return (
     <CatalogShell
       title="All Products"
-      description="Browse every currently published item. Product, category, and event content are structured in editable files for easy updates."
+      description="Browse every premium jersey, flag fanwear item, and original copy football jersey available for delivery across Bangladesh."
       products={getProducts()}
     />
   );

@@ -4,25 +4,25 @@ export const categories: Category[] = [
   {
     slug: "jersey",
     name: "Jersey",
-    description: "Premium football jerseys, fanwear, and collector-ready drops.",
+    description: "Premium football jerseys, original copy kits, flag fanwear, and collector-ready drops delivered across Bangladesh.",
     coverImage: "/assets/categories/jersey-cover.svg",
     subcategories: [
       {
         slug: "world-cup-2026",
         name: "World Cup 2026",
-        description: "Fresh national team kits for the next global stage.",
+        description: "Fresh World Cup 2026 national team jerseys for Bangladesh football fans who want a clean matchday look.",
         coverImage: "/assets/subcategories/world-cup-2026.svg",
       },
       {
         slug: "flags",
         name: "Flags",
-        description: "Flag-themed fanwear and collectible essentials.",
+        description: "Affordable flag-themed fanwear and collectible supporter pieces for football fans across Bangladesh.",
         coverImage: "/assets/subcategories/flags.svg",
       },
       {
         slug: "original-copy-jersey",
         name: "Original Copy Jersey",
-        description: "Higher-finish replicas with premium trims and feel.",
+        description: "Premium original copy football jerseys with higher-finish fabric, trims, and collector-friendly details.",
         coverImage: "/assets/subcategories/original-copy-jersey.svg",
       },
     ],
@@ -62,7 +62,7 @@ export const products: Product[] = [
     featured: true,
     isNew: true,
     isPremium: true,
-    description: "A premium Argentina home jersey with a modern supporter fit and breathable match-ready fabric.",
+    description: "A premium Argentina home jersey for Bangladesh fans, built with breathable fabric, clean crest detail, and a modern supporter fit.",
     highlights: ["Breathable performance knit", "Premium crest finish", "Regular fanwear fit"],
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
@@ -89,7 +89,7 @@ export const products: Product[] = [
     gender: "Unisex",
     featured: true,
     isNew: true,
-    description: "A darker away-kit expression for fans who prefer a sharper, modern look.",
+    description: "A darker Argentina away jersey for fans in Bangladesh who prefer a sharper modern look with soft fabric and easy styling.",
     highlights: ["Soft touch fabric", "Athletic visual lines", "Easy everyday styling"],
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
@@ -116,7 +116,7 @@ export const products: Product[] = [
     gender: "Unisex",
     featured: true,
     isPremium: true,
-    description: "The iconic yellow home kit reworked for a sharper, premium supporter wardrobe.",
+    description: "The iconic Brazil yellow home jersey reworked for a sharper premium supporter wardrobe with comfortable Bangladesh-weather wear.",
     highlights: ["Bright team color", "Comfort knit", "Premium badge application"],
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
@@ -142,7 +142,7 @@ export const products: Product[] = [
     stock: 11,
     gender: "Unisex",
     isNew: true,
-    description: "A sleek away design for supporters who want a cooler palette and premium cut.",
+    description: "A sleek Brazil away jersey for supporters who want a cooler palette, premium cut, and reliable everyday comfort.",
     highlights: ["Modern away tone", "Smooth hand feel", "Collector-friendly finish"],
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
@@ -167,7 +167,7 @@ export const products: Product[] = [
     stock: 11,
     gender: "Unisex",
     featured: true,
-    description: "A crisp monochrome-forward Germany home jersey with refined trim detailing.",
+    description: "A crisp Germany home jersey with refined trim detailing, breathable structure, and a versatile look for Bangladesh matchdays.",
     highlights: ["Minimal premium design", "Breathable build", "Versatile styling"],
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
@@ -193,7 +193,7 @@ export const products: Product[] = [
     stock: 11,
     gender: "Unisex",
     isPremium: true,
-    description: "Deep red tones and premium visual balance make this a standout Portugal piece.",
+    description: "A standout Portugal home jersey with deep red tones, premium visual balance, and soft breathable comfort.",
     highlights: ["Rich color saturation", "Soft breathable body", "Matchday-to-street styling"],
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
@@ -219,7 +219,7 @@ export const products: Product[] = [
     stock: 11,
     gender: "Unisex",
     isNew: true,
-    description: "A bold red supporter jersey with sharp contrast elements for modern styling.",
+    description: "A bold Spain home jersey for Bangladesh football fans, designed with strong color depth and comfort-first fabric.",
     highlights: ["Balanced fit", "Strong color depth", "Comfort-first fabrication"],
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
@@ -245,7 +245,7 @@ export const products: Product[] = [
     stock: 5,
     gender: "Unisex",
     featured: true,
-    description: "Flag-inspired fanwear piece with bold color blocking and lightweight comfort.",
+    description: "An affordable Argentina flag fanwear piece with bold color blocking, lightweight comfort, and easy Bangladesh delivery.",
     highlights: ["Casual supporter piece", "Soft knit", "Easy layering"],
     sizes: ["3.5 x 3"],
     colors: [
@@ -269,7 +269,7 @@ export const products: Product[] = [
     compareAtPrice: 100,
     stock: 5,
     gender: "Unisex",
-    description: "Green-and-yellow fanwear built to stand out while staying comfortable.",
+    description: "Green-and-yellow Brazil flag fanwear built to stand out at matches, watch parties, and casual outings.",
     highlights: ["Expressive palette", "Soft midweight knit", "Easy fanwear styling"],
     sizes: ["3.5 x 3"],
     colors: [
@@ -293,7 +293,7 @@ export const products: Product[] = [
     compareAtPrice: 100,
     stock: 5,
     gender: "Unisex",
-    description: "A strong black-led fanwear piece with classic German flag accents.",
+    description: "A strong black-led Germany flag fanwear piece with classic accents, comfortable fit, and collector appeal.",
     highlights: ["Strong neutral base", "Comfort fit", "Statement supporter style"],
     sizes: ["3.5 x 3"],
     colors: [
@@ -320,7 +320,7 @@ export const products: Product[] = [
     badge: "Premium Copy",
     gender: "Unisex",
     isPremium: true,
-    description: "Higher-finish Argentina replica with upgraded detailing, trims, and premium hand feel.",
+    description: "A higher-finish Argentina original copy jersey with upgraded detailing, premium trims, and a collector-grade hand feel.",
     highlights: ["Premium copy finish", "Enhanced detailing", "Collector-tier feel"],
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [
@@ -348,7 +348,7 @@ export const products: Product[] = [
     gender: "Unisex",
     featured: true,
     isPremium: true,
-    description: "Premium-finish Brazil replica with elevated trims and a more refined visual texture.",
+    description: "A premium-finish Brazil original copy jersey with elevated trims, refined texture, and a standout supporter look.",
     highlights: ["Collector-grade presentation", "Enhanced badge finish", "Premium supporter fit"],
     sizes: ["S", "M", "L", "XL", "XXL"],
     colors: [

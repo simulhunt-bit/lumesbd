@@ -23,14 +23,18 @@ export async function generateMetadata({ params }: { params: Promise<{ categoryS
   }
 
   return buildMetadata({
-    title: `${category.name} Collection | LUMES BD`,
-    description: category.description,
+    title: `${category.name} Collection Bangladesh | LUMES BD`,
+    description: `Shop ${category.name.toLowerCase()} products from LUMES BD with premium quality, buyer-friendly prices, and delivery across Bangladesh.`,
     path: `/catalog/${category.slug}`,
     image: category.coverImage,
     pageKeywords: keywords([
       `${category.name} Bangladesh`,
       `${category.name} online shop`,
       `${category.name} LUMES BD`,
+      `buy ${category.name.toLowerCase()} Bangladesh`,
+      `${category.name} price BD`,
+      `${category.name} delivery Dhaka`,
+      `premium ${category.name.toLowerCase()} BD`,
       ...category.subcategories.map((subcategory) => subcategory.name),
       ...category.subcategories.map((subcategory) => `${subcategory.name} jersey`),
     ]),
@@ -42,5 +46,11 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   const category = getCategoryBySlug(categorySlug);
   if (!category) notFound();
 
-  return <CatalogShell title={category.name} description={category.description} products={getProductsByCategory(category.slug)} />;
+  return (
+    <CatalogShell
+      title={category.name}
+      description={`Shop premium ${category.name.toLowerCase()} styles from LUMES BD, selected for football fans and delivered across Bangladesh.`}
+      products={getProductsByCategory(category.slug)}
+    />
+  );
 }

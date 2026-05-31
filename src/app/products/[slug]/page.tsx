@@ -4,7 +4,7 @@ import { CollectionSection } from "@/components/catalog/collection-section";
 import { ProductDetail } from "@/components/product/product-detail";
 import { Container } from "@/components/shared/container";
 import { getProducts, getProductBySlug, getRecommendedProducts } from "@/lib/catalog";
-import { buildMetadata, keywords, productKeywords } from "@/lib/seo";
+import { buildMetadata, keywords, productKeywords, siteUrl } from "@/lib/seo";
 
 export function generateStaticParams() {
   return getProducts().map((product) => ({
@@ -24,14 +24,23 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     });
   }
 
-  const description = `${product.description} Available in ${product.sizes.join(", ")} with Bangladesh delivery.`;
+  const description = `Buy ${product.name} from LUMES BD. Premium ${product.subcategorySlug.replaceAll("-", " ")} with sizes ${product.sizes.join(", ")} and Bangladesh delivery.`;
 
   return buildMetadata({
-    title: `${product.name} | LUMES BD`,
+    title: `${product.name} Price in Bangladesh | LUMES BD`,
     description,
     path: `/products/${product.slug}`,
     image: product.images[0],
-    pageKeywords: keywords(productKeywords(product)),
+    pageKeywords: keywords([
+      ...productKeywords(product),
+      `buy ${product.name} Bangladesh`,
+      `${product.name} price in Bangladesh`,
+      `${product.name} online BD`,
+      `${product.shortName} Dhaka delivery`,
+      `${product.shortName} Chattogram delivery`,
+      `${product.shortName} football fans BD`,
+      `${product.shortName} premium jersey`,
+    ]),
   });
 }
 
@@ -39,9 +48,32 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const product = getProductBySlug(slug);
   if (!product) notFound();
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: product.images.map((image) => new URL(image, siteUrl).toString()),
+    description: product.description,
+    brand: {
+      "@type": "Brand",
+      name: "LUMES BD",
+    },
+    category: product.subcategorySlug.replaceAll("-", " "),
+    sku: product.slug,
+    offers: {
+      "@type": "Offer",
+      url: `${siteUrl}/products/${product.slug}`,
+      priceCurrency: "BDT",
+      price: product.price,
+      availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+      areaServed: "Bangladesh",
+    },
+  };
 
   return (
     <Container>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
       <ProductDetail product={product} />
       <CollectionSection
         eyebrow="Recommended"

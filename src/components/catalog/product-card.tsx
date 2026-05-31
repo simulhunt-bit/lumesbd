@@ -6,6 +6,7 @@ import { ArrowRight, Heart, ShoppingBag } from "lucide-react";
 import { useShop } from "@/context/shop-context";
 import { SmartImage } from "@/components/shared/smart-image";
 import { PlayerEditionBadge } from "@/components/shared/player-edition-badge";
+import { productAlt } from "@/lib/seo";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/catalog";
 
@@ -24,7 +25,7 @@ export function ProductCard({
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-[1.8rem] border border-cyan-400/16 bg-[#08112d] shadow-[0_26px_80px_-58px_rgba(1,197,250,0.52)] transition duration-300 hover:-translate-y-1 hover:border-cyan-300/35 hover:shadow-[0_34px_90px_-54px_rgba(1,197,250,0.62)]">
       <div className="relative aspect-square overflow-hidden bg-[radial-gradient(circle_at_30%_15%,_rgba(1,197,250,0.22),_rgba(6,12,36,0.96)_60%)]">
-        <SmartImage src={product.images[0]} alt={product.name} fill imageClassName="object-cover group-hover:scale-105" sizes="(max-width: 768px) 100vw, 25vw" />
+        <SmartImage src={product.images[0]} alt={productAlt(product, "catalog image")} fill imageClassName="object-cover group-hover:scale-105" sizes="(max-width: 768px) 100vw, 25vw" />
         <button
           type="button"
           className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-cyan-200/20 bg-[#060c24]/78 text-cyan-50 shadow-sm backdrop-blur transition hover:border-cyan-300/40 hover:text-[#01c5fa]"

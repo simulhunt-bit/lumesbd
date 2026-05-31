@@ -7,6 +7,7 @@ import { useShop } from "@/context/shop-context";
 import { SmartImage } from "@/components/shared/smart-image";
 import { PlayerEditionBadge } from "@/components/shared/player-edition-badge";
 import { defaultPurchasableSize, isPurchasableSize } from "@/lib/product-availability";
+import { productAlt } from "@/lib/seo";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/catalog";
 
@@ -23,7 +24,7 @@ export function ProductDetail({ product }: { product: Product }) {
       <div className="grid gap-5 sm:gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
         <div className="space-y-4">
           <div className="relative aspect-[4/4.5] overflow-hidden rounded-[1.5rem] border border-cyan-400/16 bg-[radial-gradient(circle_at_30%_15%,_rgba(1,197,250,0.22),_rgba(6,12,36,0.96)_60%)] shadow-[0_34px_90px_-58px_rgba(1,197,250,0.62)] sm:rounded-[2rem]">
-            <SmartImage src={activeImage} alt={product.name} fill imageClassName="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
+            <SmartImage src={activeImage} alt={productAlt(product, "main image")} fill imageClassName="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
             {product.badge ? (
               <span className="absolute left-4 top-4 z-10 rounded-full border border-cyan-200/20 bg-[#01c5fa]/16 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-50 backdrop-blur">
                 {product.badge}
@@ -42,7 +43,7 @@ export function ProductDetail({ product }: { product: Product }) {
                 }`}
                 aria-label={`View ${product.name} image`}
               >
-                <SmartImage src={image} alt={product.name} fill imageClassName="object-cover" sizes="33vw" />
+                <SmartImage src={image} alt={productAlt(product, "gallery image")} fill imageClassName="object-cover" sizes="33vw" />
               </button>
             ))}
           </div>

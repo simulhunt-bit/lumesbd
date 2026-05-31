@@ -5,8 +5,8 @@ import { ServiceStrip } from "@/components/home/service-strip";
 import { buildMetadata, keywords } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
-  title: "LUMES BD | Premium Jerseys in Bangladesh",
-  description: "Shop premium football jerseys, flag fanwear, and original copy jerseys from LUMES BD with Bangladesh delivery.",
+  title: "Premium Football Jerseys in Bangladesh | LUMES BD",
+  description: "Shop premium football jerseys, flag fanwear, and original copy jerseys from LUMES BD with fast delivery across Bangladesh.",
   path: "/",
   pageKeywords: keywords([
     "premium jersey Bangladesh",
@@ -14,6 +14,11 @@ export const metadata: Metadata = buildMetadata({
     "Argentina jersey BD",
     "Brazil jersey BD",
     "football fanwear shop",
+    "buy football jersey Bangladesh",
+    "football jersey delivery Dhaka",
+    "original copy jersey Bangladesh",
+    "premium fanwear BD",
+    "online jersey shop Bangladesh",
   ]),
 });
 

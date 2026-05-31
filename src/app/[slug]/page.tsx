@@ -3,45 +3,52 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Container } from "@/components/shared/container";
 import { TrackOrderView } from "@/components/views/track-order-view";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, keywords } from "@/lib/seo";
 
 type InfoPageContent = {
   title: string;
   description: string;
   body: string;
+  pageKeywords: string[];
   sections?: Array<{ title: string; body: string }>;
 };
 
 const pages: Record<string, InfoPageContent> = {
   "track-order": {
     title: "Track Order",
-    description: "Check the latest status of your LUMES BD order.",
-    body: "Follow your order from confirmation to pickup and completion with the same order or tracking ID we sent by email.",
+    description: "Track your LUMES BD jersey order online with the order or tracking ID sent after confirmation.",
+    body: "Follow your premium jersey order from confirmation to pickup and completion with the same order or tracking ID we sent by email.",
+    pageKeywords: ["track LUMES BD order", "jersey order tracking Bangladesh", "track jersey delivery BD", "LUMES BD delivery status"],
   },
   about: {
     title: "About Us",
-    description: "Learn more about LUMES BD.",
-    body: "LUMES BD curates premium jerseys and modern fashion wear for men and women, with quality, comfort, and Bangladesh-wide delivery at the center of the store.",
+    description: "Learn about LUMES BD, a Bangladesh online shop for premium jerseys, fanwear, and modern sports fashion.",
+    body: "LUMES BD curates premium jerseys, original copy football kits, flag fanwear, and modern sports fashion for men and women, with quality, comfort, and Bangladesh-wide delivery at the center of the store.",
+    pageKeywords: ["about LUMES BD", "Bangladesh jersey brand", "premium jersey shop Bangladesh", "online fanwear store BD"],
   },
   contact: {
     title: "Contact Us",
-    description: "Get support from LUMES BD.",
-    body: "Need help with sizing, delivery, or an order? Reach out through our social channels or support inbox and the LUMES BD team will help.",
+    description: "Contact LUMES BD for jersey sizing, delivery, payment, product, or order support in Bangladesh.",
+    body: "Need help with jersey sizing, delivery, payment, product availability, or an order? Reach out through our social channels or support inbox and the LUMES BD team will help.",
+    pageKeywords: ["contact LUMES BD", "jersey support Bangladesh", "football jersey order help BD", "LUMES BD customer support"],
   },
   "how-to-order": {
     title: "How to Order",
-    description: "How to place an order at LUMES BD.",
-    body: "Choose your product, select size and color, add it to cart, and complete checkout with your delivery information.",
+    description: "Learn how to order football jerseys from LUMES BD online with size, color, cart, and delivery details.",
+    body: "Choose your football jersey, select size and color, add it to cart, and complete checkout with your Bangladesh delivery information.",
+    pageKeywords: ["how to order jersey online BD", "buy jersey from LUMES BD", "football jersey checkout Bangladesh", "order jersey online Bangladesh"],
   },
   "shipping-policy": {
     title: "Shipping Policy",
-    description: "LUMES BD shipping information.",
-    body: "We deliver across Bangladesh. Delivery timing and charge can vary by location and courier availability.",
+    description: "Read LUMES BD shipping details for football jersey delivery across Dhaka and Bangladesh.",
+    body: "We deliver premium jerseys across Bangladesh. Delivery timing and charge can vary by location, courier availability, and order confirmation time.",
+    pageKeywords: ["jersey delivery Bangladesh", "LUMES BD shipping", "football jersey delivery Dhaka", "courier delivery jersey BD"],
   },
   "return-refund": {
     title: "Return & Refund",
-    description: "LUMES BD return and refund policy.",
-    body: "Eligible items can be returned within 7 days when they are unused, unworn, and in original condition.",
+    description: "Review LUMES BD return and refund rules for unused football jerseys and eligible fashion items.",
+    body: "Eligible jersey and fashion items can be returned within 7 days when they are unused, unworn, and in original condition.",
+    pageKeywords: ["LUMES BD return policy", "jersey refund Bangladesh", "football jersey exchange BD", "online jersey return policy"],
     sections: [
       {
         title: "Customized jerseys",
@@ -51,18 +58,21 @@ const pages: Record<string, InfoPageContent> = {
   },
   terms: {
     title: "Terms & Conditions",
-    description: "LUMES BD store terms.",
+    description: "Read the LUMES BD store terms for jersey orders, payments, delivery, returns, and customer details.",
     body: "By shopping with LUMES BD, customers agree to provide accurate order details and follow the store policies for delivery, returns, and payments.",
+    pageKeywords: ["LUMES BD terms", "jersey store terms Bangladesh", "online shop terms BD", "football jersey order terms"],
   },
   privacy: {
     title: "Privacy Policy",
-    description: "How LUMES BD handles customer information.",
-    body: "Customer information is used to process orders, provide support, and improve the shopping experience.",
+    description: "See how LUMES BD uses customer information for jersey orders, support, delivery, and shopping improvements.",
+    body: "Customer information is used to process jersey orders, provide support, coordinate delivery, and improve the shopping experience.",
+    pageKeywords: ["LUMES BD privacy", "Bangladesh ecommerce privacy", "jersey order data policy", "online shop privacy BD"],
   },
   faq: {
     title: "FAQ",
-    description: "Frequently asked LUMES BD questions.",
-    body: "For quick help, contact support with your product name, size question, order number, or delivery area.",
+    description: "Find answers about LUMES BD jersey sizing, prices, delivery, ordering, returns, and product availability.",
+    body: "For quick help, contact support with your product name, size question, order number, delivery area, or preferred jersey style.",
+    pageKeywords: ["LUMES BD FAQ", "jersey size Bangladesh", "football jersey questions BD", "jersey delivery FAQ"],
   },
 };
 
@@ -86,6 +96,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${page.title} | LUMES BD`,
     description: page.description,
     path: `/${slug}`,
+    pageKeywords: keywords(page.pageKeywords),
   });
 }
 

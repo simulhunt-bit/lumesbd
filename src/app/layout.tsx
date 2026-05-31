@@ -8,8 +8,8 @@ import "@/app/globals.css";
 
 export const metadata: Metadata = {
   ...buildMetadata({
-    title: "LUMES BD | Light Up Your Style",
-    description: "Premium jerseys and modern fashion wear for men and women with delivery across Bangladesh.",
+    title: "LUMES BD | Premium Jersey Shop Bangladesh",
+    description: "Buy premium football jerseys, original copy kits, and fanwear online from LUMES BD with fast delivery across Bangladesh.",
     path: "/",
     pageKeywords: keywords([
       "LUMES BD official store",
@@ -17,6 +17,9 @@ export const metadata: Metadata = {
       "modern fashion wear Bangladesh",
       "football jersey online BD",
       "jersey delivery Bangladesh",
+      "buy premium jersey Bangladesh",
+      "football jersey shop Dhaka",
+      "original copy football jersey BD",
     ]),
   }),
   metadataBase: new URL(siteUrl),
@@ -52,8 +55,29 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "OnlineStore",
+    name: "LUMES BD",
+    url: siteUrl,
+    logo: `${siteUrl}/lumes-logo.png`,
+    image: `${siteUrl}/lumes-logo.png`,
+    description: "Premium football jerseys, original copy kits, flag jerseys, and fanwear with delivery across Bangladesh.",
+    areaServed: {
+      "@type": "Country",
+      name: "Bangladesh",
+    },
+    sameAs: [siteUrl],
+  };
+
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+      </head>
       <body className="bg-[#060c24] text-white antialiased">
         <AuthProvider>
           <ShopProvider>

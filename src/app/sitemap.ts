@@ -4,6 +4,17 @@ import { getCategories, getProducts } from "@/lib/catalog";
 export const dynamic = "force-static";
 
 const siteUrl = "https://lumesbd.shop";
+const publicInfoPages = [
+  "track-order",
+  "about",
+  "contact",
+  "how-to-order",
+  "shipping-policy",
+  "return-refund",
+  "terms",
+  "privacy",
+  "faq",
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -21,6 +32,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 0.9,
     },
+    ...publicInfoPages.map((slug) => ({
+      url: `${siteUrl}/${slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: slug === "how-to-order" || slug === "contact" ? 0.7 : 0.55,
+    })),
   ];
 
   const categoryPages: MetadataRoute.Sitemap = getCategories().flatMap((category) => [
