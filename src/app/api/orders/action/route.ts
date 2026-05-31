@@ -7,6 +7,7 @@ import {
   sendOrderPickedUpEmail,
   sendOrderStatusEmail,
 } from "@/lib/email";
+import { extractSteadfastTrackingId, sendOrderToSteadfast } from "@/lib/integrations/steadfast";
 import { buildTrackingRecord, saveOrderTrackingRecord } from "@/lib/order-tracking";
 import { validateCheckoutOrder } from "@/lib/orders";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
@@ -87,13 +88,46 @@ export async function GET(req: Request) {
     await sendOrderStatusEmail(order, status);
 
     if (action === "confirm") {
+      const origin = new URL(req.url).origin;
       await saveOrderTrackingRecord(buildTrackingRecord(order, "confirmed"));
-      await sendAdminTrackingRequestEmail(order, new URL(req.url).origin);
+
+      try {
+        const steadfastResult = await sendOrderToSteadfast(order);
+        const trackingId = extractSteadfastTrackingId(steadfastResult);
+
+        if (!trackingId) {
+          throw new Error("Steadfast did not return a tracking ID or consignment ID.");
+        }
+
+        const pickedUpOrder = {
+          ...order,
+          trackingId,
+          pickedUpAt: new Date().toISOString(),
+        };
+
+        await saveOrderTrackingRecord(buildTrackingRecord(pickedUpOrder, "picked_up"));
+        await sendOrderPickedUpEmail(pickedUpOrder, origin);
+        await sendAdminCompletionRequestEmail(pickedUpOrder, origin);
+
+        return renderActionPage(
+          "Order confirmed",
+          `${order.orderId} has been confirmed. Steadfast parcel created with tracking ID ${trackingId}. Customer tracking email and admin completion request sent.`,
+        );
+      } catch (steadfastError) {
+        await sendAdminTrackingRequestEmail(order, origin);
+
+        return renderActionPage(
+          "Order confirmed",
+          `${order.orderId} has been confirmed, but Steadfast parcel creation failed: ${
+            steadfastError instanceof Error ? steadfastError.message : "Unknown Steadfast error"
+          }. Manual tracking request sent to admin.`,
+        );
+      }
     }
 
     return renderActionPage(
       `Order ${status}`,
-      `${order.orderId} has been ${status}. Notification email sent.${action === "confirm" ? " Tracking request sent to admin." : ""}`,
+      `${order.orderId} has been ${status}. Notification email sent.`,
     );
   } catch (error) {
     return new NextResponse(

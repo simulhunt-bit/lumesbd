@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { DeliveryOrderPayload, sendOrderToSteadfast, steadfastReadiness } from "@/lib/integrations/steadfast";
+import { sendOrderToSteadfast, steadfastReadiness, type DeliveryOrderPayload } from "@/lib/integrations/steadfast";
 
 export async function POST(req: Request) {
   const payload = (await req.json()) as DeliveryOrderPayload;
