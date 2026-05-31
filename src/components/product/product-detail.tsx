@@ -5,6 +5,7 @@ import { Check, Heart, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 import { useState } from "react";
 import { useShop } from "@/context/shop-context";
 import { SmartImage } from "@/components/shared/smart-image";
+import { PlayerEditionBadge } from "@/components/shared/player-edition-badge";
 import { defaultPurchasableSize, isPurchasableSize } from "@/lib/product-availability";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/catalog";
@@ -28,6 +29,7 @@ export function ProductDetail({ product }: { product: Product }) {
                 {product.badge}
               </span>
             ) : null}
+            <PlayerEditionBadge className={`absolute left-4 z-10 ${product.badge ? "top-14" : "top-4"}`} />
           </div>
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {product.images.map((image) => (
@@ -46,7 +48,10 @@ export function ProductDetail({ product }: { product: Product }) {
           </div>
         </div>
         <div className="rounded-[1.5rem] border border-cyan-400/16 bg-[#08112d] p-5 shadow-[0_26px_80px_-58px_rgba(1,197,250,0.52)] sm:rounded-[2rem] sm:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200/58 sm:tracking-[0.28em]">{product.subcategorySlug.replaceAll("-", " ")}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200/58 sm:tracking-[0.28em]">{product.subcategorySlug.replaceAll("-", " ")}</p>
+            <PlayerEditionBadge />
+          </div>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">{product.name}</h1>
           <div className="mt-4 flex flex-wrap items-end gap-3">
             <p className="text-2xl font-semibold text-white sm:text-3xl">{formatPrice(product.price)}</p>

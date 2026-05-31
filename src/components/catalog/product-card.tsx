@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Heart, ShoppingBag } from "lucide-react";
 import { useShop } from "@/context/shop-context";
 import { SmartImage } from "@/components/shared/smart-image";
+import { PlayerEditionBadge } from "@/components/shared/player-edition-badge";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/catalog";
 
@@ -46,6 +47,7 @@ export function ProductCard({
             {product.badge}
           </span>
         )}
+        <PlayerEditionBadge className={`absolute left-4 z-10 ${product.badge ? "top-14" : "top-4"}`} />
       </div>
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-4">
