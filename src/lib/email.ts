@@ -200,3 +200,62 @@ export const sendOrderStatusEmail = async (
     html: emailShell(title, `<p>${escapeHtml(intro)}</p>${orderDetailsHtml(order)}`),
   });
 };
+
+export const sendWishlistDemandEmail = async ({
+  productName,
+  size,
+  totalCount,
+  milestone,
+  users,
+}: {
+  productName: string;
+  size: string;
+  totalCount: number;
+  milestone: number;
+  users: Array<{ displayName: string; email: string }>;
+}) => {
+  const userRows = users
+    .slice(-10)
+    .map(
+      (user) => `
+        <tr>
+          <td style="padding:8px;border-bottom:1px solid #e4e4e7;">${escapeHtml(user.displayName || "LUMES Customer")}</td>
+          <td style="padding:8px;border-bottom:1px solid #e4e4e7;">${escapeHtml(user.email || "No email")}</td>
+        </tr>
+      `,
+    )
+    .join("");
+  const html = emailShell(
+    `Wishlist demand reached ${milestone}`,
+    `
+      <p><strong>Product:</strong> ${escapeHtml(productName)}</p>
+      <p><strong>Size:</strong> ${escapeHtml(size)}</p>
+      <p><strong>Total wishlist demand:</strong> ${escapeHtml(totalCount)}</p>
+      <table style="width:100%;margin-top:18px;border-collapse:collapse;font-family:Arial,sans-serif;">
+        <thead>
+          <tr style="background:#f4f4f5;">
+            <th style="padding:8px;text-align:left;">Recent users</th>
+            <th style="padding:8px;text-align:left;">Email</th>
+          </tr>
+        </thead>
+        <tbody>${userRows}</tbody>
+      </table>
+    `,
+  );
+  const text = [
+    `Wishlist demand reached ${milestone}`,
+    `Product: ${productName}`,
+    `Size: ${size}`,
+    `Total wishlist demand: ${totalCount}`,
+    "Recent users:",
+    ...users.slice(-10).map((user) => `- ${user.displayName || "LUMES Customer"} | ${user.email || "No email"}`),
+  ].join("\n");
+
+  await createTransport().sendMail({
+    from: fromAddress(),
+    to: ADMIN_EMAIL,
+    subject: `Wishlist demand: ${productName} size ${size} reached ${milestone}`,
+    text,
+    html,
+  });
+};

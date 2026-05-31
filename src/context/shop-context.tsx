@@ -8,7 +8,9 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
+import { useAuth } from "@/context/auth-context";
 import type { JerseyCustomization } from "@/lib/orders";
+import { isPurchasableSize } from "@/lib/product-availability";
 import type { Product } from "@/types/catalog";
 
 type CartItem = {
@@ -52,7 +54,34 @@ const WISHLIST_KEY = "lumes-wishlist";
 
 const buildVariantId = (slug: string, size: string, color: string) => `${slug}|${size}|${color}`;
 
+const trackWishlistDemand = async ({
+  product,
+  size,
+  idToken,
+  displayName,
+  email,
+}: {
+  product: Product;
+  size: string;
+  idToken: string;
+  displayName?: string;
+  email?: string;
+}) => {
+  await fetch("/api/wishlist-demand", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      idToken,
+      productSlug: product.slug,
+      size,
+      displayName,
+      email,
+    }),
+  });
+};
+
 export function ShopProvider({ children }: PropsWithChildren) {
+  const { user, profile } = useAuth();
   const [cart, setCart] = useState<CartItem[]>(() => {
     if (typeof window === "undefined") return [];
     const storedCart = window.localStorage.getItem(CART_KEY);
@@ -141,6 +170,18 @@ export function ShopProvider({ children }: PropsWithChildren) {
             },
           ];
         });
+
+        if (user && !isPurchasableSize(product, selectedSize)) {
+          void user.getIdToken().then((idToken) =>
+            trackWishlistDemand({
+              product,
+              size: selectedSize,
+              idToken,
+              displayName: profile?.displayName ?? user.displayName ?? undefined,
+              email: profile?.email ?? user.email ?? undefined,
+            }),
+          );
+        }
       },
       updateCartQuantity: (id, quantity, maxQuantity = Number.POSITIVE_INFINITY) => {
         const safeMaxQuantity = Math.max(1, maxQuantity);
@@ -161,7 +202,7 @@ export function ShopProvider({ children }: PropsWithChildren) {
       cartCount: cart.reduce((sum, item) => sum + item.quantity, 0),
       wishlistCount: wishlist.length,
     }),
-    [cart, wishlist],
+    [cart, profile, user, wishlist],
   );
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;
