@@ -1,29 +1,25 @@
 import type { Metadata } from "next";
-import { Manrope, Noto_Sans_Bengali } from "next/font/google";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { AuthProvider } from "@/context/auth-context";
 import { ShopProvider } from "@/context/shop-context";
+import { buildMetadata, keywords, siteUrl } from "@/lib/seo";
 import "@/app/globals.css";
 
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
-
-const notoSansBengali = Noto_Sans_Bengali({
-  subsets: ["bengali"],
-  variable: "--font-bengali",
-});
-
 export const metadata: Metadata = {
-  title: "LUMES BD | Light Up Your Style",
-  description: "Premium Jerseys & Modern Fashion Wear for Men & Women. Quality, Comfort, Trend. Delivery all over Bangladesh.",
-  keywords: ["jerseys", "fashion", "clothing", "Bangladesh", "LUMES BD", "premium wear", "men", "women"],
-  metadataBase: new URL("https://lumesbd.shop"),
-  alternates: {
-    canonical: "https://lumesbd.shop",
-  },
+  ...buildMetadata({
+    title: "LUMES BD | Light Up Your Style",
+    description: "Premium jerseys and modern fashion wear for men and women with delivery across Bangladesh.",
+    path: "/",
+    pageKeywords: keywords([
+      "LUMES BD official store",
+      "premium jerseys Bangladesh",
+      "modern fashion wear Bangladesh",
+      "football jersey online BD",
+      "jersey delivery Bangladesh",
+    ]),
+  }),
+  metadataBase: new URL(siteUrl),
   robots: {
     index: true,
     follow: true,
@@ -48,39 +44,6 @@ export const metadata: Metadata = {
     apple: "/lumes-logo.png",
   },
   manifest: "/manifest.json",
-  openGraph: {
-    title: "LUMES BD | Light Up Your Style",
-    description: "Premium Jerseys & Modern Fashion Wear for Men & Women. Quality, Comfort, Trend. Delivery all over Bangladesh.",
-    url: "https://lumesbd.shop",
-    siteName: "LUMES BD",
-    type: "website",
-    locale: "en_BD",
-    images: [
-      {
-        url: "https://lumesbd.shop/lumes-logo.png",
-        width: 512,
-        height: 512,
-        alt: "LUMES BD logo",
-        type: "image/png",
-      },
-      {
-        url: "https://lumesbd.shop/icon.png",
-        width: 512,
-        height: 512,
-        alt: "LUMES BD icon",
-        type: "image/png",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "LUMES BD | Light Up Your Style",
-    description: "Premium Jerseys & Modern Fashion Wear for Men & Women. Quality, Comfort, Trend. Delivery all over Bangladesh.",
-    images: {
-      url: "https://lumesbd.shop/lumes-logo.png",
-      alt: "LUMES BD logo",
-    },
-  },
   formatDetection: {
     email: false,
     address: false,
@@ -91,7 +54,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${manrope.variable} ${notoSansBengali.variable} bg-[#060c24] text-white antialiased`}>
+      <body className="bg-[#060c24] text-white antialiased">
         <AuthProvider>
           <ShopProvider>
             <Header />
