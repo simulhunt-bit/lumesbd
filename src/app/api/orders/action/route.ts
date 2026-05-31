@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import {
+  createActionUrl,
   parseSignedAction,
   sendAdminCompletionRequestEmail,
+  sendAdminPickedUpRequestEmail,
   sendAdminTrackingRequestEmail,
   sendOrderCompletedEmail,
   sendOrderPickedUpEmail,
@@ -32,7 +34,11 @@ export async function GET(req: Request) {
   }
 
   if (
-    (action !== "confirm" && action !== "cancel" && action !== "tracking" && action !== "complete") ||
+    (action !== "confirm" &&
+      action !== "cancel" &&
+      action !== "picked-up" &&
+      action !== "tracking" &&
+      action !== "complete") ||
     !payload ||
     !signature
   ) {
@@ -84,12 +90,14 @@ export async function GET(req: Request) {
       return renderActionPage("Order completed", `${order.orderId} has been completed. Thank-you email sent to the customer.`);
     }
 
-    const status = action === "confirm" ? "confirmed" : "cancelled";
-    await sendOrderStatusEmail(order, status);
-
-    if (action === "confirm") {
+    if (action === "picked-up") {
       const origin = new URL(req.url).origin;
-      await saveOrderTrackingRecord(buildTrackingRecord(order, "confirmed"));
+      let pickedUpOrder = {
+        ...order,
+        pickedUpAt: new Date().toISOString(),
+      };
+
+      await saveOrderTrackingRecord(buildTrackingRecord(pickedUpOrder, "picked_up_from_us"));
 
       try {
         const steadfastResult = await sendOrderToSteadfast(order);
@@ -99,30 +107,45 @@ export async function GET(req: Request) {
           throw new Error("Steadfast did not return a tracking ID or consignment ID.");
         }
 
-        const pickedUpOrder = {
-          ...order,
+        pickedUpOrder = {
+          ...pickedUpOrder,
           trackingId,
-          pickedUpAt: new Date().toISOString(),
         };
 
-        await saveOrderTrackingRecord(buildTrackingRecord(pickedUpOrder, "picked_up"));
+        await saveOrderTrackingRecord(buildTrackingRecord(pickedUpOrder, "picked_up_from_us"));
         await sendOrderPickedUpEmail(pickedUpOrder, origin);
         await sendAdminCompletionRequestEmail(pickedUpOrder, origin);
 
         return renderActionPage(
-          "Order confirmed",
-          `${order.orderId} has been confirmed. Steadfast parcel created with tracking ID ${trackingId}. Customer tracking email and admin completion request sent.`,
+          "Order picked up",
+          `${order.orderId} is now marked as picked up from us. Steadfast parcel created with tracking ID ${trackingId}. Customer delivery-soon email and admin completion request sent.`,
         );
       } catch (steadfastError) {
-        await sendAdminTrackingRequestEmail(order, origin);
+        await sendOrderPickedUpEmail(pickedUpOrder, origin);
+        await sendAdminTrackingRequestEmail(pickedUpOrder, origin);
 
         return renderActionPage(
-          "Order confirmed",
-          `${order.orderId} has been confirmed, but Steadfast parcel creation failed: ${
+          "Order picked up",
+          `${order.orderId} is now marked as picked up from us, but Steadfast parcel creation failed: ${
             steadfastError instanceof Error ? steadfastError.message : "Unknown Steadfast error"
-          }. Manual tracking request sent to admin.`,
+          }. Customer delivery-soon email sent and manual tracking request sent to admin.`,
         );
       }
+    }
+
+    const status = action === "confirm" ? "confirmed" : "cancelled";
+    await sendOrderStatusEmail(order, status);
+
+    if (action === "confirm") {
+      const origin = new URL(req.url).origin;
+      const pickedUpUrl = createActionUrl(origin, order, "picked-up");
+      await saveOrderTrackingRecord(buildTrackingRecord(order, "soon_picked_up"));
+      await sendAdminPickedUpRequestEmail(order, origin);
+
+      return renderActionPage(
+        "Order confirmed",
+        `${order.orderId} has been confirmed and is now shown as soon picked up. Picked Up request sent to admin. <a href="${pickedUpUrl}">Open Picked Up action</a>.`,
+      );
     }
 
     return renderActionPage(
@@ -167,7 +190,7 @@ export async function POST(req: Request) {
       pickedUpAt: new Date().toISOString(),
     };
     const origin = new URL(req.url).origin;
-    await saveOrderTrackingRecord(buildTrackingRecord(pickedUpOrder, "picked_up"));
+    await saveOrderTrackingRecord(buildTrackingRecord(pickedUpOrder, "picked_up_from_us"));
     await sendOrderPickedUpEmail(pickedUpOrder, origin);
     await sendAdminCompletionRequestEmail(pickedUpOrder, origin);
 

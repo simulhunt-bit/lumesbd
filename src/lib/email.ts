@@ -7,7 +7,7 @@ import {
   uniqueEmails,
 } from "@/lib/orders";
 
-type OrderAction = "confirm" | "cancel" | "tracking" | "complete";
+type OrderAction = "confirm" | "cancel" | "picked-up" | "tracking" | "complete";
 
 const escapeHtml = (value: string | number) =>
   String(value)
@@ -223,6 +223,28 @@ export const sendAdminTrackingRequestEmail = async (order: CheckoutOrder, origin
   });
 };
 
+export const sendAdminPickedUpRequestEmail = async (order: CheckoutOrder, origin: string) => {
+  const pickedUpUrl = createActionUrl(origin, order, "picked-up");
+  const html = emailShell(
+    `Mark picked up for ${order.orderId}`,
+    `
+      <p>The order is confirmed and is now shown to the customer as soon picked up. Click once the parcel is picked up from LUMES BD.</p>
+      ${orderDetailsHtml(order)}
+      <div style="margin-top:24px;">
+        <a href="${escapeHtml(pickedUpUrl)}" style="display:inline-block;border-radius:999px;background:#0891b2;color:#ffffff;padding:12px 18px;text-decoration:none;font-weight:700;">Picked Up</a>
+      </div>
+    `,
+  );
+
+  await createTransport().sendMail({
+    from: fromAddress(),
+    to: ADMIN_EMAIL,
+    subject: `Picked up from us? ${order.orderId}`,
+    text: `${orderText(order)}\n\nPicked Up: ${pickedUpUrl}`,
+    html,
+  });
+};
+
 export const sendOrderPickedUpEmail = async (order: CheckoutOrder, origin: string) => {
   const trackingUrl = new URL("/track-order", origin);
   trackingUrl.searchParams.set("orderId", order.orderId);
@@ -230,7 +252,7 @@ export const sendOrderPickedUpEmail = async (order: CheckoutOrder, origin: strin
     trackingUrl.searchParams.set("trackingId", order.trackingId);
   }
 
-  const intro = `Your Cash on Delivery order has been picked up by the courier.`;
+  const intro = "Your Cash on Delivery order has been picked up from us and will be delivered soon.";
 
   await createTransport().sendMail({
     from: fromAddress(),

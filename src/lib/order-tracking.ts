@@ -1,6 +1,6 @@
 import type { CheckoutOrder } from "@/lib/orders";
 
-export type TrackingStatus = "confirmed" | "picked_up" | "completed";
+export type TrackingStatus = "confirmed" | "soon_picked_up" | "picked_up" | "picked_up_from_us" | "completed";
 
 export type OrderTrackingRecord = {
   orderId: string;
@@ -11,6 +11,7 @@ export type OrderTrackingRecord = {
   trackingId?: string;
   status: TrackingStatus;
   confirmedAt?: string;
+  soonPickedUpAt?: string;
   pickedUpAt?: string;
   completedAt?: string;
   updatedAt: string;
@@ -59,8 +60,9 @@ export const buildTrackingRecord = (
   productNames: order.items.map((item) => item.productName),
   trackingId: order.trackingId,
   status,
-  confirmedAt: status === "confirmed" ? new Date().toISOString() : undefined,
-  pickedUpAt: order.pickedUpAt,
+  confirmedAt: status === "soon_picked_up" ? new Date().toISOString() : undefined,
+  soonPickedUpAt: status === "soon_picked_up" ? new Date().toISOString() : undefined,
+  pickedUpAt: status === "picked_up_from_us" ? (order.pickedUpAt ?? new Date().toISOString()) : order.pickedUpAt,
   completedAt: order.completedAt,
   updatedAt: new Date().toISOString(),
 });
@@ -71,6 +73,7 @@ export const saveOrderTrackingRecord = async (record: OrderTrackingRecord) => {
     ...existing,
     ...record,
     confirmedAt: record.confirmedAt ?? existing?.confirmedAt,
+    soonPickedUpAt: record.soonPickedUpAt ?? existing?.soonPickedUpAt,
     pickedUpAt: record.pickedUpAt ?? existing?.pickedUpAt,
     completedAt: record.completedAt ?? existing?.completedAt,
   };

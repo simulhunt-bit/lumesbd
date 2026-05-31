@@ -87,7 +87,7 @@ export default async function InfoPage({ params }: PageProps) {
   return (
     <section className="bg-[#f8fbff] py-16 text-zinc-950 sm:py-24">
       <Container>
-        <div className="mx-auto max-w-3xl">
+        <div className={`mx-auto ${slug === "track-order" ? "max-w-5xl" : "max-w-3xl"}`}>
           <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#01aeea]">LUMES BD</p>
           <h1 className="mt-4 text-4xl font-bold tracking-normal text-zinc-950 sm:text-5xl">{page.title}</h1>
           <p className="mt-5 text-lg leading-8 text-zinc-600">{page.body}</p>
