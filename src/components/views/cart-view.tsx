@@ -74,16 +74,15 @@ export function CartView() {
     })),
   );
   const flagProducts = getProducts().filter((product) => product.subcategorySlug === "flags");
+  const productMatchesCountry = (product: CartProduct["product"], country: string) =>
+    product.slug.includes(country) || product.name.toLowerCase().includes(country);
   const matchingJerseyCountForFlag = (flagProduct: (typeof flagProducts)[number]) => {
     const country = flagProduct.slug.replace(/-flag$/, "");
 
     return cartProducts.reduce((sum, { item, product }) => {
       if (product.subcategorySlug === "flags") return sum;
 
-      const productName = product.name.toLowerCase();
-      const isMatchingCountry = product.slug.includes(country) || productName.includes(country);
-
-      return sum + (isMatchingCountry ? item.quantity : 0);
+      return sum + (productMatchesCountry(product, country) ? item.quantity : 0);
     }, 0);
   };
   const recommendedFlag = cartProducts.reduce<(typeof flagProducts)[number] | null>(
@@ -100,7 +99,7 @@ export function CartView() {
           return (
             flagProduct.stock > 0 &&
             flagCartQuantity < matchingJerseyCount &&
-            (product.slug.includes(country) || product.name.toLowerCase().includes(country))
+            productMatchesCountry(product, country)
           );
         }) ?? null
       );
@@ -191,16 +190,47 @@ export function CartView() {
     updateCartCustomizations(item.id, customizations);
   };
 
-  const updateItemQuantity = (item: CartItem, quantity: number, maxQuantity: number) => {
+  const updateItemQuantity = (
+    item: CartItem,
+    product: CartProduct["product"],
+    quantity: number,
+    maxQuantity: number,
+  ) => {
     const safeMaxQuantity = Math.max(1, maxQuantity);
     const safeQuantity = Number.isFinite(quantity) ? quantity : 1;
     const nextQuantity = Math.min(Math.max(1, Math.floor(safeQuantity)), safeMaxQuantity);
+    const isDecreasing = nextQuantity < item.quantity;
 
     updateCartQuantity(item.id, nextQuantity, maxQuantity);
 
     const type = item.customizations?.[0]?.type;
     if (type) {
       updateCartCustomizations(item.id, buildCustomizations(nextQuantity, type, item.customizations));
+    }
+
+    if (isDecreasing && product.subcategorySlug !== "flags") {
+      flagProducts.forEach((flagProduct) => {
+        const country = flagProduct.slug.replace(/-flag$/, "");
+        if (!productMatchesCountry(product, country)) return;
+
+        const flagCartItem = cartProducts.find((entry) => entry.product.slug === flagProduct.slug)?.item;
+        if (!flagCartItem) return;
+
+        const matchingJerseyCount = cartProducts.reduce((sum, entry) => {
+          if (entry.product.subcategorySlug === "flags") return sum;
+          if (!productMatchesCountry(entry.product, country)) return sum;
+
+          return sum + (entry.item.id === item.id ? nextQuantity : entry.item.quantity);
+        }, 0);
+
+        if (flagCartItem.quantity <= matchingJerseyCount) return;
+
+        if (matchingJerseyCount > 0) {
+          updateCartQuantity(flagCartItem.id, matchingJerseyCount, flagProduct.stock);
+        } else {
+          removeFromCart(flagCartItem.id);
+        }
+      });
     }
   };
 
@@ -339,7 +369,7 @@ export function CartView() {
                       <div className="inline-flex h-11 w-full items-center overflow-hidden rounded-full border border-white/10 bg-white/5 min-[420px]:w-auto">
                         <button
                           type="button"
-                          onClick={() => updateItemQuantity(item, item.quantity - 1, maxCartQuantity)}
+                          onClick={() => updateItemQuantity(item, product, item.quantity - 1, maxCartQuantity)}
                           disabled={item.quantity <= 1}
                           className="flex h-full flex-1 items-center justify-center text-lg text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-slate-600 min-[420px]:w-10 min-[420px]:flex-none"
                           aria-label={`Decrease ${product.name} quantity`}
@@ -351,13 +381,13 @@ export function CartView() {
                           min={1}
                           max={Math.max(1, maxCartQuantity)}
                           value={item.quantity}
-                          onChange={(event) => updateItemQuantity(item, Number(event.target.value), maxCartQuantity)}
+                          onChange={(event) => updateItemQuantity(item, product, Number(event.target.value), maxCartQuantity)}
                           className="h-full w-14 border-x border-white/10 bg-transparent text-center text-sm font-semibold text-white outline-none"
                           aria-label={`${product.name} quantity`}
                         />
                         <button
                           type="button"
-                          onClick={() => updateItemQuantity(item, item.quantity + 1, maxCartQuantity)}
+                          onClick={() => updateItemQuantity(item, product, item.quantity + 1, maxCartQuantity)}
                           disabled={item.quantity >= maxCartQuantity}
                           className="flex h-full flex-1 items-center justify-center text-lg text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-slate-600 min-[420px]:w-10 min-[420px]:flex-none"
                           aria-label={`Increase ${product.name} quantity`}
