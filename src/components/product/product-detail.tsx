@@ -144,19 +144,6 @@ export function ProductDetail({ product }: { product: Product }) {
           </div>
         </div>
       </div>
-      <div className="mt-8 grid gap-4 sm:mt-10 lg:grid-cols-3">
-        {product.story.map((item) => (
-          <article key={item.title} className="overflow-hidden rounded-[1.5rem] border border-cyan-400/16 bg-[#08112d] shadow-[0_24px_70px_-58px_rgba(1,197,250,0.48)] sm:rounded-[1.8rem]">
-            <div className="relative aspect-[16/10] bg-white/5">
-              <SmartImage src={item.image} alt={item.title} fill imageClassName="object-cover" sizes="(max-width: 1024px) 100vw, 33vw" />
-            </div>
-            <div className="p-5">
-              <h2 className="text-lg font-semibold text-white">{item.title}</h2>
-              <p className="mt-3 text-sm leading-7 text-cyan-50/68">{item.text}</p>
-            </div>
-          </article>
-        ))}
-      </div>
     </section>
   );
 }
