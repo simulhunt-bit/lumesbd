@@ -17,7 +17,7 @@ export function Header() {
   const primaryNavigation = navigation.filter((item) => item.href !== "/dashboard");
 
   return (
-    <header className="sticky top-0 z-40 border-b border-cyan-500/20 bg-[rgba(6,12,36,0.86)] backdrop-blur-xl">
+    <header className="sticky top-0 z-[100] border-b border-cyan-500/20 bg-[rgba(6,12,36,0.96)] backdrop-blur-xl">
       <Container className="flex min-h-[68px] items-center justify-between gap-2 sm:min-h-[76px] sm:gap-4">
         <div className="flex items-center gap-2 sm:gap-3">
           <Logo />
