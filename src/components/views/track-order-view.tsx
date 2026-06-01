@@ -9,9 +9,6 @@ type TrackingStatus = "confirmed" | "soon_picked_up" | "picked_up" | "picked_up_
 
 type OrderTrackingRecord = {
   orderId: string;
-  customerEmail: string;
-  customerName: string;
-  customerPhone: string;
   productNames: string[];
   trackingId?: string;
   status: TrackingStatus;
@@ -73,8 +70,9 @@ export function TrackOrderView() {
   const { profile } = useAuth();
   const [orderId, setOrderId] = useState(searchParams.get("orderId") ?? "");
   const [trackingId, setTrackingId] = useState(searchParams.get("trackingId") ?? "");
+  const [email, setEmail] = useState(profile?.email ?? "");
   const [orders, setOrders] = useState<OrderTrackingRecord[]>([]);
-  const [message, setMessage] = useState("Enter your order or tracking details to load status.");
+  const [message, setMessage] = useState("Enter your order ID with the matching email or tracking ID to load status.");
   const [loading, setLoading] = useState(false);
   const profileEmail = profile?.email ?? "";
 
@@ -82,9 +80,9 @@ export function TrackOrderView() {
     const params = new URLSearchParams();
     if (orderId.trim()) params.set("orderId", orderId.trim());
     if (trackingId.trim()) params.set("trackingId", trackingId.trim());
-    if (!orderId.trim() && profileEmail) params.set("email", profileEmail);
+    if (!trackingId.trim() && (email.trim() || profileEmail)) params.set("email", (email.trim() || profileEmail).trim());
     return params.toString();
-  }, [orderId, profileEmail, trackingId]);
+  }, [email, orderId, profileEmail, trackingId]);
 
   const loadOrders = async () => {
     if (!queryString) return;
@@ -174,7 +172,7 @@ export function TrackOrderView() {
             Bangladesh delivery
           </span>
         </div>
-        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto]">
           <input
             value={orderId}
             onChange={(event) => setOrderId(event.target.value)}
@@ -187,6 +185,14 @@ export function TrackOrderView() {
             onChange={(event) => setTrackingId(event.target.value)}
             placeholder="Tracking ID"
             aria-label="Tracking ID"
+            className="min-h-12 rounded-2xl border border-cyan-300/15 bg-white/95 px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:bg-white"
+          />
+          <input
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="Order email"
+            aria-label="Order email"
+            type="email"
             className="min-h-12 rounded-2xl border border-cyan-300/15 bg-white/95 px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:bg-white"
           />
           <button

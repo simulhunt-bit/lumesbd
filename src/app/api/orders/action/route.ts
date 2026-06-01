@@ -16,6 +16,14 @@ import { getClientIp, rateLimit } from "@/lib/rate-limit";
 
 const ACTION_LINK_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
+const escapeHtml = (value: string | number) =>
+  String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const action = url.searchParams.get("action");
@@ -211,10 +219,10 @@ const renderActionPage = (title: string, message: string) =>
     `
       <!doctype html>
       <html>
-        <head><title>${title}</title></head>
+        <head><title>${escapeHtml(title)}</title></head>
         <body style="font-family:Arial,sans-serif;padding:32px;color:#18181b;">
-          <h1>${title}</h1>
-          <p>${message}</p>
+          <h1>${escapeHtml(title)}</h1>
+          <p>${escapeHtml(message)}</p>
         </body>
       </html>
     `,
