@@ -41,5 +41,5 @@ export const deliveryChargeForWeight = (district?: string, weightGrams = 0) => {
   if (!district?.trim() || weightGrams <= 0) return 0;
   const baseCharge = districtDeliveryCharge(district);
   const packageCount = Math.max(1, Math.ceil(weightGrams / 1000));
-  return Math.min(baseCharge * packageCount, MAX_DELIVERY_CHARGE);
+  return baseCharge * packageCount;
 };
