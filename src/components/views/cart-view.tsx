@@ -8,7 +8,7 @@ import { useAuth } from "@/context/auth-context";
 import { LocationSelects } from "@/components/shared/location-selects";
 import { SmartImage } from "@/components/shared/smart-image";
 import { getProducts } from "@/lib/catalog";
-import { chargeableDeliveryItemCount, formatPrice, deliveryChargeForWeight } from "@/lib/utils";
+import { COD_CHARGE, deliveryWeightForItems, formatPrice, deliveryChargeForWeight } from "@/lib/utils";
 import {
   COD_PAYMENT_METHOD,
   CUSTOMIZATION_PRICES,
@@ -67,10 +67,10 @@ export function CartView() {
     0,
   );
   const totalItems = cartProducts.reduce((sum, entry) => sum + entry.item.quantity, 0);
-  const deliveryItemCount = chargeableDeliveryItemCount(
+  const deliveryWeightGrams = deliveryWeightForItems(
     cartProducts.map(({ item, product }) => ({
       quantity: item.quantity,
-      isFlagAddOn: product.subcategorySlug === "flags",
+      isFlag: product.subcategorySlug === "flags",
     })),
   );
   const flagProducts = getProducts().filter((product) => product.subcategorySlug === "flags");
@@ -127,9 +127,12 @@ export function CartView() {
   const addressLabel = (address: typeof savedAddresses[number]) =>
     [address.fullName, address.district, address.thana].filter(Boolean).join(" - ");
 
-  const deliveryCharge = deliveryChargeForWeight(selectedDistrict, deliveryItemCount);
-  const grandTotal = total + deliveryCharge;
-  const deliveryWeightText = `${Math.max(1, Math.ceil(deliveryItemCount / 3))}KG`;
+  const deliveryCharge = deliveryChargeForWeight(selectedDistrict, deliveryWeightGrams);
+  const grandTotal = total + deliveryCharge + COD_CHARGE;
+  const deliveryWeightText =
+    deliveryWeightGrams >= 1000
+      ? `${Number((deliveryWeightGrams / 1000).toFixed(1))}KG`
+      : `${deliveryWeightGrams}g`;
   const canSubmitOrder =
     cartProducts.length > 0 &&
     cartProducts.every(({ item }) => {
@@ -261,6 +264,7 @@ export function CartView() {
       })),
       subtotal: total,
       deliveryCharge,
+      codCharge: COD_CHARGE,
       vat: 0,
       grandTotal,
       paymentMethod: COD_PAYMENT_METHOD,
@@ -613,11 +617,15 @@ export function CartView() {
               <span className="text-right font-medium text-white">{selectedDistrict ? deliveryWeightText : "Choose address"}</span>
             </div>
             <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
+              <span>COD charge</span>
+              <span className="text-right font-medium text-white">{formatPrice(COD_CHARGE)}</span>
+            </div>
+            <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
               <span>Total</span>
               <span className="text-right font-medium text-white">{formatPrice(grandTotal)}</span>
             </div>
             <p className="mt-4 text-xs leading-5 text-slate-400">
-              Same address delivery: up to 3 pcs counts as 1KG. More items increase the shipment weight and delivery cost.
+              Delivery is calculated from exact product weight: each jersey is 400g and each flag is 100g.
             </p>
             <div className="mt-6 border-t border-white/10 pt-6">
               <p className="flex items-center justify-between gap-4 text-sm text-slate-300">

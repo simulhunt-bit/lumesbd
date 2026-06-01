@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { sendAdminOrderEmail } from "@/lib/email";
 import { getProducts } from "@/lib/catalog";
-import { chargeableDeliveryItemCount, deliveryChargeForWeight } from "@/lib/utils";
+import { COD_CHARGE, deliveryChargeForWeight, deliveryWeightForItems } from "@/lib/utils";
 import {
   COD_PAYMENT_METHOD,
   CUSTOMIZATION_PRICES,
@@ -148,21 +148,22 @@ export async function POST(req: Request) {
     });
 
     const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
-    const deliveryItemCount = chargeableDeliveryItemCount(
+    const deliveryWeightGrams = deliveryWeightForItems(
       items.map((item) => ({
         quantity: item.quantity,
-        isFlagAddOn: item.subcategorySlug === "flags",
+        isFlag: item.subcategorySlug === "flags",
       })),
     );
-    const deliveryCharge = deliveryChargeForWeight(order.district, deliveryItemCount);
+    const deliveryCharge = deliveryChargeForWeight(order.district, deliveryWeightGrams);
     const normalizedOrder: CheckoutOrder = {
       ...order,
       orderId: `LUMES-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
       items,
       subtotal,
       deliveryCharge,
+      codCharge: COD_CHARGE,
       vat: 0,
-      grandTotal: subtotal + deliveryCharge,
+      grandTotal: subtotal + deliveryCharge + COD_CHARGE,
       createdAt: new Date().toISOString(),
       paymentMethod: COD_PAYMENT_METHOD,
     };

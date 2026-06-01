@@ -25,21 +25,22 @@ export const districtDeliveryCharge = (district?: string) => {
   return 180;
 };
 
-export const deliveryChargeForWeight = (district?: string, itemCount = 0) => {
-  if (!district?.trim() || itemCount <= 0) return 0;
-  const baseCharge = districtDeliveryCharge(district);
-  const packageCount = Math.max(1, Math.ceil(itemCount / 3));
-  return baseCharge * packageCount;
-};
+export const JERSEY_WEIGHT_GRAMS = 400;
+export const FLAG_WEIGHT_GRAMS = 100;
+export const COD_CHARGE = 10;
 
-export const chargeableDeliveryItemCount = (
-  items: { quantity: number; isFlagAddOn?: boolean }[],
-) => {
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const nonFlagItems = items.reduce(
-    (sum, item) => sum + (item.isFlagAddOn ? 0 : item.quantity),
+export const deliveryWeightForItems = (
+  items: { quantity: number; isFlag?: boolean }[],
+) =>
+  items.reduce(
+    (sum, item) =>
+      sum + item.quantity * (item.isFlag ? FLAG_WEIGHT_GRAMS : JERSEY_WEIGHT_GRAMS),
     0,
   );
 
-  return nonFlagItems || totalItems;
+export const deliveryChargeForWeight = (district?: string, weightGrams = 0) => {
+  if (!district?.trim() || weightGrams <= 0) return 0;
+  const baseCharge = districtDeliveryCharge(district);
+  const packageCount = Math.max(1, Math.ceil(weightGrams / 1000));
+  return baseCharge * packageCount;
 };
