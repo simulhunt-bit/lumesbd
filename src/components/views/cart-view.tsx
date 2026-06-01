@@ -598,9 +598,38 @@ export function CartView() {
                 </span>
                 <span className="mt-2 block font-semibold text-white">{COD_PAYMENT_METHOD}</span>
               </div>
-            <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
-              <span>Delivery district</span>
-              <span className="text-right font-medium text-white">{selectedDistrict || "Choose address"}</span>
+            <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">
+                Selected products
+              </p>
+              <div className="mt-3 space-y-3">
+                {cartProducts.map(({ item, product }) => {
+                  const customizationTotal =
+                    item.customizations?.reduce(
+                      (sum, customization) => sum + customization.price,
+                      0,
+                    ) ?? 0;
+                  const lineTotal = product.price * item.quantity + customizationTotal;
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex items-start justify-between gap-4 text-sm text-slate-300"
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate font-medium text-white">{product.name}</span>
+                        <span className="mt-1 block text-xs text-slate-400">
+                          {item.quantity} x {formatPrice(product.price)}
+                          {customizationTotal > 0 && ` + ${formatPrice(customizationTotal)} customization`}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-right font-medium text-white">
+                        {formatPrice(lineTotal)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
             <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
               <span>Delivery charge</span>
