@@ -8,7 +8,7 @@ import { useAuth } from "@/context/auth-context";
 import { LocationSelects } from "@/components/shared/location-selects";
 import { SmartImage } from "@/components/shared/smart-image";
 import { getProducts } from "@/lib/catalog";
-import { COD_CHARGE, deliveryWeightForItems, formatPrice, deliveryChargeForWeight } from "@/lib/utils";
+import { deliveryWeightForItems, formatPrice, deliveryChargeForWeight } from "@/lib/utils";
 import {
   COD_PAYMENT_METHOD,
   CUSTOMIZATION_PRICES,
@@ -128,7 +128,7 @@ export function CartView() {
     [address.fullName, address.district, address.thana].filter(Boolean).join(" - ");
 
   const deliveryCharge = deliveryChargeForWeight(selectedDistrict, deliveryWeightGrams);
-  const grandTotal = total + deliveryCharge + COD_CHARGE;
+  const grandTotal = total + deliveryCharge;
   const canSubmitOrder =
     cartProducts.length > 0 &&
     cartProducts.every(({ item }) => {
@@ -260,7 +260,6 @@ export function CartView() {
       })),
       subtotal: total,
       deliveryCharge,
-      codCharge: COD_CHARGE,
       vat: 0,
       grandTotal,
       paymentMethod: COD_PAYMENT_METHOD,
@@ -632,14 +631,14 @@ export function CartView() {
               </div>
             </div>
             <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
+              <span>Delivery method</span>
+              <span className="text-right font-medium text-white">Home delivery</span>
+            </div>
+            <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
               <span>Delivery charge</span>
               <span className="text-right font-medium text-white">
                 {selectedDistrict ? formatPrice(deliveryCharge) : "Choose address"}
               </span>
-            </div>
-            <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
-              <span>COD charge</span>
-              <span className="text-right font-medium text-white">{formatPrice(COD_CHARGE)}</span>
             </div>
             <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
               <span>Total</span>

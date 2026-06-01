@@ -36,7 +36,6 @@ export type CheckoutOrder = {
   items: CheckoutOrderItem[];
   subtotal: number;
   deliveryCharge: number;
-  codCharge: number;
   vat: number;
   grandTotal: number;
   paymentMethod: typeof COD_PAYMENT_METHOD;

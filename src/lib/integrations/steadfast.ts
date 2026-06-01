@@ -45,6 +45,7 @@ export const mapOrderToSteadfastPayload = (payload: DeliveryOrderPayload): Stead
   cod_amount: payload.amount,
   recipient_email: payload.customerEmail,
   note: [
+    "Delivery: Home delivery",
     `Payment: ${payload.paymentMethod ?? "Cash on Delivery"}`,
     `District: ${payload.district}`,
     payload.thana ? `Thana: ${payload.thana}` : "",

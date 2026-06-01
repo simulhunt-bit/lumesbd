@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { sendAdminOrderEmail } from "@/lib/email";
 import { getProducts } from "@/lib/catalog";
-import { COD_CHARGE, deliveryChargeForWeight, deliveryWeightForItems } from "@/lib/utils";
+import { deliveryChargeForWeight, deliveryWeightForItems } from "@/lib/utils";
 import {
   COD_PAYMENT_METHOD,
   CUSTOMIZATION_PRICES,
@@ -161,9 +161,8 @@ export async function POST(req: Request) {
       items,
       subtotal,
       deliveryCharge,
-      codCharge: COD_CHARGE,
       vat: 0,
-      grandTotal: subtotal + deliveryCharge + COD_CHARGE,
+      grandTotal: subtotal + deliveryCharge,
       createdAt: new Date().toISOString(),
       paymentMethod: COD_PAYMENT_METHOD,
     };

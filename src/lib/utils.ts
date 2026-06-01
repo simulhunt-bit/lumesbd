@@ -9,6 +9,8 @@ export const formatPrice = (price: number) =>
     maximumFractionDigits: 0,
   }).format(price);
 
+export const MAX_DELIVERY_CHARGE = 160;
+
 export const districtDeliveryCharge = (district?: string) => {
   if (!district?.trim()) return 0;
   const normalized = district.trim().toLowerCase();
@@ -19,15 +21,12 @@ export const districtDeliveryCharge = (district?: string) => {
   if (normalized.includes("sylhet")) return 120;
   if (normalized.includes("barisal") || normalized.includes("barishal")) return 140;
   if (normalized.includes("khulna")) return 150;
-  if (normalized.includes("mymensingh")) return 160;
-  if (normalized.includes("rangpur")) return 170;
 
-  return 180;
+  return MAX_DELIVERY_CHARGE;
 };
 
 export const JERSEY_WEIGHT_GRAMS = 400;
 export const FLAG_WEIGHT_GRAMS = 100;
-export const COD_CHARGE = 10;
 
 export const deliveryWeightForItems = (
   items: { quantity: number; isFlag?: boolean }[],
@@ -42,5 +41,5 @@ export const deliveryChargeForWeight = (district?: string, weightGrams = 0) => {
   if (!district?.trim() || weightGrams <= 0) return 0;
   const baseCharge = districtDeliveryCharge(district);
   const packageCount = Math.max(1, Math.ceil(weightGrams / 1000));
-  return baseCharge * packageCount;
+  return Math.min(baseCharge * packageCount, MAX_DELIVERY_CHARGE);
 };
