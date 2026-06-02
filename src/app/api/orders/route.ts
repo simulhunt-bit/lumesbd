@@ -11,6 +11,7 @@ import {
   validateCheckoutOrder,
 } from "@/lib/orders";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
+import { sendMetaPurchaseEvent } from "@/lib/meta-conversions";
 
 const MAX_ORDER_BODY_BYTES = 20_000;
 
@@ -169,6 +170,9 @@ export async function POST(req: Request) {
 
     validateCheckoutOrder(normalizedOrder);
     await sendAdminOrderEmail(normalizedOrder, new URL(req.url).origin);
+    sendMetaPurchaseEvent(normalizedOrder, req).catch((error) => {
+      console.error(error instanceof Error ? error.message : "Could not send Meta purchase event.");
+    });
 
     return NextResponse.json({ success: true, orderId: normalizedOrder.orderId });
   } catch (error) {

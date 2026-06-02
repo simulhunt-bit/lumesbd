@@ -38,7 +38,12 @@ const required = [
   "STEADFAST_SECRET_KEY",
 ];
 
-const recommended = ["STEADFAST_ENDPOINT_SECRET"];
+const recommended = [
+  "STEADFAST_ENDPOINT_SECRET",
+  "NEXT_PUBLIC_META_PIXEL_ID",
+  "META_CONVERSIONS_ACCESS_TOKEN",
+  "META_PIXEL_ID",
+];
 
 const missing = required.filter((key) => !process.env[key]?.trim());
 const missingRecommended = recommended.filter((key) => !process.env[key]?.trim());

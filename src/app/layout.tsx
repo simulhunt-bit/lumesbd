@@ -7,6 +7,8 @@ import { ShopProvider } from "@/context/shop-context";
 import { buildMetadata, keywords, siteUrl } from "@/lib/seo";
 import "@/app/globals.css";
 
+const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim() || "2417781878727667";
+
 export const metadata: Metadata = {
   ...buildMetadata({
     title: "LUMES BD | Premium Jersey Shop Bangladesh",
@@ -91,7 +93,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '2417781878727667');
+            fbq('init', '${metaPixelId}');
             fbq('track', 'PageView');
           `}
         </Script>
@@ -101,7 +103,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             height="1"
             width="1"
             style={{ display: "none" }}
-            src="https://www.facebook.com/tr?id=2417781878727667&ev=PageView&noscript=1"
+            src={`https://www.facebook.com/tr?id=${metaPixelId}&ev=PageView&noscript=1`}
             alt=""
           />
         </noscript>
