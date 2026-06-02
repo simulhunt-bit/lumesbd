@@ -26,21 +26,21 @@ const services = [
 
 export function ServiceStrip() {
   return (
-    <section className="bg-[#f8fbff] py-4">
+    <section className="bg-[#060c24] py-4">
       <Container>
-        <div className="grid overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-[0_20px_48px_-36px_rgba(24,24,27,0.55)] sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid overflow-hidden rounded-2xl border border-cyan-400/16 bg-[#08112d] shadow-[0_26px_80px_-58px_rgba(1,197,250,0.52)] sm:grid-cols-2 lg:grid-cols-4">
           {services.map((service) => {
             const Icon = service.icon;
 
             return (
               <div
                 key={service.title}
-                className="flex min-h-28 items-center gap-5 border-zinc-100 px-6 py-5 sm:px-8 lg:border-l first:lg:border-l-0"
+                className="flex min-h-28 items-center gap-5 border-cyan-400/12 px-6 py-5 sm:px-8 lg:border-l first:lg:border-l-0"
               >
                 <Icon className="h-12 w-12 shrink-0 text-[#01aeea]" strokeWidth={1.8} />
                 <div>
-                  <h2 className="text-base font-bold text-zinc-950">{service.title}</h2>
-                  <p className="mt-1.5 max-w-40 text-sm leading-6 text-zinc-600">{service.text}</p>
+                  <h2 className="text-base font-bold text-white">{service.title}</h2>
+                  <p className="mt-1.5 max-w-40 text-sm leading-6 text-cyan-50/68">{service.text}</p>
                 </div>
               </div>
             );
