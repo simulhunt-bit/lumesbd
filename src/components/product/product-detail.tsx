@@ -13,41 +13,49 @@ import type { Product } from "@/types/catalog";
 
 export function ProductDetail({ product }: { product: Product }) {
   const router = useRouter();
-  const [activeImage, setActiveImage] = useState(product.images[0]);
+  const productImages = product.images.filter(Boolean);
+  const [activeImage, setActiveImage] = useState<string | null>(productImages[0] ?? null);
   const [selectedSize, setSelectedSize] = useState(defaultPurchasableSize(product));
   const defaultColor = product.colors[0]?.name ?? "";
   const { addToCart, addToWishlist } = useShop();
   const canBuySelectedSize = product.stock > 0 && isPurchasableSize(product, selectedSize);
+  const hasProductImages = productImages.length > 0;
 
   return (
     <section className="py-6 sm:py-12">
-      <div className="grid gap-5 sm:gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
-        <div className="space-y-4">
-          <div className="relative aspect-[4/4.5] overflow-hidden rounded-[1.5rem] border border-cyan-400/16 bg-[radial-gradient(circle_at_30%_15%,_rgba(1,197,250,0.22),_rgba(6,12,36,0.96)_60%)] shadow-[0_34px_90px_-58px_rgba(1,197,250,0.62)] sm:rounded-[2rem]">
-            <SmartImage src={activeImage} alt={productAlt(product, "main image")} fill imageClassName="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
-            {product.badge ? (
-              <span className="absolute left-4 top-4 z-10 rounded-full border border-cyan-200/20 bg-[#01c5fa]/16 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-50 backdrop-blur">
-                {product.badge}
-              </span>
-            ) : null}
-            <PlayerEditionBadge className="absolute bottom-4 left-4 z-10 max-w-[calc(100%-2rem)]" />
+      <div
+        className={`grid gap-5 sm:gap-8 lg:items-start ${
+          hasProductImages ? "lg:grid-cols-[1.08fr_0.92fr]" : "lg:grid-cols-1"
+        }`}
+      >
+        {hasProductImages ? (
+          <div className="space-y-4">
+            <div className="relative aspect-[4/4.5] overflow-hidden rounded-[1.5rem] border border-cyan-400/16 bg-[radial-gradient(circle_at_30%_15%,_rgba(1,197,250,0.22),_rgba(6,12,36,0.96)_60%)] shadow-[0_34px_90px_-58px_rgba(1,197,250,0.62)] sm:rounded-[2rem]">
+              <SmartImage src={activeImage} alt={productAlt(product, "main image")} fill imageClassName="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
+              {product.badge ? (
+                <span className="absolute left-4 top-4 z-10 rounded-full border border-cyan-200/20 bg-[#01c5fa]/16 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-50 backdrop-blur">
+                  {product.badge}
+                </span>
+              ) : null}
+              <PlayerEditionBadge className="absolute bottom-4 left-4 z-10 max-w-[calc(100%-2rem)]" />
+            </div>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              {productImages.map((image) => (
+                <button
+                  key={image}
+                  type="button"
+                  onClick={() => setActiveImage(image)}
+                  className={`relative aspect-square overflow-hidden rounded-[1rem] border bg-[#08112d] transition sm:rounded-[1.4rem] ${
+                    activeImage === image ? "border-[#01c5fa] ring-2 ring-[#01c5fa]/24" : "border-cyan-400/16 hover:border-cyan-300/40"
+                  }`}
+                  aria-label={`View ${product.name} image`}
+                >
+                  <SmartImage src={image} alt={productAlt(product, "gallery image")} fill imageClassName="object-cover" sizes="33vw" />
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            {product.images.map((image) => (
-              <button
-                key={image}
-                type="button"
-                onClick={() => setActiveImage(image)}
-                className={`relative aspect-square overflow-hidden rounded-[1rem] border bg-[#08112d] transition sm:rounded-[1.4rem] ${
-                  activeImage === image ? "border-[#01c5fa] ring-2 ring-[#01c5fa]/24" : "border-cyan-400/16 hover:border-cyan-300/40"
-                }`}
-                aria-label={`View ${product.name} image`}
-              >
-                <SmartImage src={image} alt={productAlt(product, "gallery image")} fill imageClassName="object-cover" sizes="33vw" />
-              </button>
-            ))}
-          </div>
-        </div>
+        ) : null}
         <div className="rounded-[1.5rem] border border-cyan-400/16 bg-[#08112d] p-5 shadow-[0_26px_80px_-58px_rgba(1,197,250,0.52)] sm:rounded-[2rem] sm:p-8">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200/58 sm:tracking-[0.28em]">{product.subcategorySlug.replaceAll("-", " ")}</p>

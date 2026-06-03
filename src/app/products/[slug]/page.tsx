@@ -25,12 +25,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   const description = `Buy ${product.name} from LUMES BD. Premium ${product.subcategorySlug.replaceAll("-", " ")} with sizes ${product.sizes.join(", ")} and Bangladesh delivery.`;
+  const productImages = product.images.filter(Boolean);
 
   return buildMetadata({
     title: `${product.name} Price in Bangladesh | LUMES BD`,
     description,
     path: `/products/${product.slug}`,
-    image: product.images[0],
+    image: productImages[0],
     pageKeywords: keywords([
       ...productKeywords(product),
       `buy ${product.name} Bangladesh`,
@@ -48,11 +49,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const product = getProductBySlug(slug);
   if (!product) notFound();
+  const productImages = product.images.filter(Boolean);
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    image: product.images.map((image) => new URL(image, siteUrl).toString()),
     description: product.description,
     brand: {
       "@type": "Brand",
@@ -69,6 +70,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       itemCondition: "https://schema.org/NewCondition",
       areaServed: "Bangladesh",
     },
+    ...(productImages.length > 0
+      ? { image: productImages.map((image) => new URL(image, siteUrl).toString()) }
+      : {}),
   };
 
   return (
