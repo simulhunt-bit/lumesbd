@@ -36,7 +36,9 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 const sessionStartedAtKey = "lumes-session-started-at";
 const sessionDeviceIdKey = "lumes-session-device-id";
 const pendingLoginSessionKey = "lumes-pending-login-session";
+const profileCacheKeyPrefix = "lumes-profile-cache";
 const sessionDurationMs = 2 * 24 * 60 * 60 * 1000;
+const profileLoadTimeoutMs = 4_000;
 
 const readSessionStartedAt = () => {
   const value = window.localStorage.getItem(sessionStartedAtKey);
@@ -73,6 +75,59 @@ const consumePendingLogin = () => {
 
 const isSessionExpired = (startedAt: number) => Date.now() - startedAt >= sessionDurationMs;
 
+const getProfileCacheKey = (uid: string) => `${profileCacheKeyPrefix}:${uid}`;
+
+const isUserProfile = (value: unknown): value is UserProfile => {
+  if (!value || typeof value !== "object") return false;
+
+  const profile = value as Partial<UserProfile>;
+  return (
+    typeof profile.displayName === "string" &&
+    typeof profile.email === "string" &&
+    Array.isArray(profile.addresses)
+  );
+};
+
+const readCachedUserProfile = (uid: string) => {
+  try {
+    const value = window.localStorage.getItem(getProfileCacheKey(uid));
+    if (!value) return null;
+
+    const profile = JSON.parse(value) as unknown;
+    return isUserProfile(profile) ? profile : null;
+  } catch {
+    return null;
+  }
+};
+
+const cacheUserProfile = (uid: string, profile: UserProfile) => {
+  try {
+    window.localStorage.setItem(getProfileCacheKey(uid), JSON.stringify(profile));
+  } catch {
+    // Storage can fail in private browsing or when a profile photo is too large.
+  }
+};
+
+const createFallbackProfile = (user: User): UserProfile => ({
+  displayName: user.displayName ?? "LUMES Customer",
+  email: user.email ?? "",
+  phoneNumber: user.phoneNumber ?? "",
+  addresses: [],
+});
+
+const withTimeout = async <T,>(promise: Promise<T>, timeoutMs: number) => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error("Profile data request timed out.")), timeoutMs);
+  });
+
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+};
+
 const getSafeNextPath = () => {
   const path = `${window.location.pathname}${window.location.search}`;
   if (!path || path === "/login") return "/dashboard";
@@ -103,8 +158,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!auth) return;
     const currentAuth = auth;
+    let cancelled = false;
 
-    return onAuthStateChanged(currentAuth, async (nextUser) => {
+    const unsubscribeAuth = onAuthStateChanged(currentAuth, async (nextUser) => {
       if (nextUser) {
         const startedAt = readSessionStartedAt();
         if (startedAt && isSessionExpired(startedAt)) {
@@ -121,29 +177,45 @@ export function AuthProvider({ children }: PropsWithChildren) {
           startSession();
         }
         if (consumePendingLogin()) {
-          await saveActiveUserSession(nextUser.uid, getDeviceSessionId());
+          saveActiveUserSession(nextUser.uid, getDeviceSessionId()).catch((error) => {
+            console.error(error instanceof Error ? error.message : "Could not save active session.");
+          });
         }
 
+        const fallbackProfile = createFallbackProfile(nextUser);
+        const cachedProfile = readCachedUserProfile(nextUser.uid);
         setUser(nextUser);
-        const existingProfile = await loadUserProfile(nextUser.uid);
-        const fallbackProfile: UserProfile = existingProfile ?? {
-          displayName: nextUser.displayName ?? "LUMES Customer",
-          email: nextUser.email ?? "",
-          phoneNumber: nextUser.phoneNumber ?? "",
-          addresses: [],
-        };
+        setProfile(cachedProfile ?? fallbackProfile);
+        setLoading(false);
 
-        setProfile(fallbackProfile);
-        if (!existingProfile) {
-          await saveUserProfile(nextUser.uid, fallbackProfile);
+        try {
+          const existingProfile = await withTimeout(loadUserProfile(nextUser.uid), profileLoadTimeoutMs);
+          if (cancelled || currentAuth.currentUser?.uid !== nextUser.uid) return;
+
+          const nextProfile = existingProfile ?? cachedProfile ?? fallbackProfile;
+          setProfile(nextProfile);
+          cacheUserProfile(nextUser.uid, nextProfile);
+
+          if (!existingProfile) {
+            saveUserProfile(nextUser.uid, nextProfile).catch((error) => {
+              console.error(error instanceof Error ? error.message : "Could not initialize profile.");
+            });
+          }
+        } catch (error) {
+          console.error(error instanceof Error ? error.message : "Could not load profile data.");
         }
       } else {
         clearSession();
         setUser(null);
         setProfile(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
+
+    return () => {
+      cancelled = true;
+      unsubscribeAuth();
+    };
   }, [router]);
 
   useEffect(() => {
@@ -229,6 +301,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
         const nextProfile = { ...profile, photoDataUrl: dataUrl };
         setProfile(nextProfile);
+        cacheUserProfile(user.uid, nextProfile);
         await saveUserProfile(user.uid, nextProfile);
       },
       saveAddresses: async (addresses) => {
@@ -236,6 +309,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         const trimmed = addresses.slice(0, 3);
         const nextProfile = { ...profile, addresses: trimmed };
         setProfile(nextProfile);
+        cacheUserProfile(user.uid, nextProfile);
         await saveUserProfile(user.uid, nextProfile);
       },
     }),

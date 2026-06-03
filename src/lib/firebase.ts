@@ -94,12 +94,15 @@ export const saveUserProfile = async (uid: string, profile: UserProfile) => {
 export const loadUserProfile = async (uid: string) => {
   if (!db) return null;
 
-  const profileSnapshot = await get(ref(db, `users/${uid}/profile`));
+  const [profileSnapshot, legacySnapshot] = await Promise.all([
+    get(ref(db, `users/${uid}/profile`)),
+    get(ref(db, `users/${uid}`)),
+  ]);
+
   if (profileSnapshot.exists()) {
     return profileSnapshot.val() as UserProfile;
   }
 
-  const legacySnapshot = await get(ref(db, `users/${uid}`));
   if (!legacySnapshot.exists()) return null;
 
   const value = legacySnapshot.val() as Partial<UserProfile>;
