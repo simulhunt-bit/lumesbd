@@ -12,6 +12,7 @@ import {
 } from "@/lib/orders";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 import { sendMetaPurchaseEvent } from "@/lib/meta-conversions";
+import { getCoupon, validateCoupon, applyCoupon } from "@/lib/coupons";
 
 const MAX_ORDER_BODY_BYTES = 20_000;
 
@@ -156,14 +157,39 @@ export async function POST(req: Request) {
       })),
     );
     const deliveryCharge = deliveryChargeForWeight(order.district, deliveryWeightGrams);
+
+    // Apply coupon if provided
+    let discountAmount = 0;
+    let finalDeliveryCharge = deliveryCharge;
+    const discountCode = order.discountCode?.trim().toUpperCase().toLowerCase();
+
+    if (discountCode) {
+      const coupon = getCoupon(discountCode);
+      if (coupon) {
+        const validation = validateCoupon(coupon);
+        if (!validation.valid) {
+          throw new Error(validation.reason || "Invalid coupon code.");
+        }
+        const discount = applyCoupon(coupon, subtotal, deliveryCharge);
+        discountAmount = discount.discount;
+        if (discount.newDeliveryCharge !== undefined) {
+          finalDeliveryCharge = discount.newDeliveryCharge;
+        }
+      } else {
+        throw new Error("Invalid coupon code.");
+      }
+    }
+
     const normalizedOrder: CheckoutOrder = {
       ...order,
       orderId: `LUMES-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
       items,
       subtotal,
-      deliveryCharge,
+      deliveryCharge: finalDeliveryCharge,
       vat: 0,
-      grandTotal: subtotal + deliveryCharge,
+      grandTotal: subtotal + finalDeliveryCharge,
+      discountCode: discountCode || undefined,
+      discountAmount: discountAmount || undefined,
       createdAt: new Date().toISOString(),
       paymentMethod: COD_PAYMENT_METHOD,
     };

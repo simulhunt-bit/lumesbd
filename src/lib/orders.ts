@@ -40,6 +40,8 @@ export type CheckoutOrder = {
   grandTotal: number;
   paymentMethod: typeof COD_PAYMENT_METHOD;
   createdAt: string;
+  discountCode?: string;
+  discountAmount?: number;
   trackingId?: string;
   pickedUpAt?: string;
   completedAt?: string;
