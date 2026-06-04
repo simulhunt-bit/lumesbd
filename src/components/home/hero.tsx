@@ -6,6 +6,11 @@ import { Container } from "@/components/shared/container";
 export function Hero() {
   return (
     <section className="relative overflow-hidden bg-[#060c24] py-10 sm:py-16 lg:py-20">
+      <img
+        src="/assets/hero banner 01.png"
+        alt="Hero Banner"
+        className="absolute inset-0 h-full w-full object-cover opacity-[0.85]"
+      />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(1,197,250,0.12)_0%,_rgba(6,12,36,0)_34%),radial-gradient(circle_at_82%_16%,_rgba(1,197,250,0.18),_transparent_30%)]" />
       <Container className="relative grid items-center gap-10 lg:grid-cols-[1.02fr_0.98fr]">
         <div className="max-w-2xl">
