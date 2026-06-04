@@ -23,8 +23,8 @@ export const AVAILABLE_COUPONS: Record<string, Coupon> = {
     discountTarget: "delivery",
     isActive: true,
     currentUses: 0,
-    startsAt: "2026-06-08T00:00:00Z",
-    expiresAt: "2026-06-26T12:00:00Z",
+    startsAt: "2026-06-05T00:00:00Z",
+    expiresAt: "2026-06-08T12:00:00Z",
     description: "50% off on delivery charges",
   },
 };
