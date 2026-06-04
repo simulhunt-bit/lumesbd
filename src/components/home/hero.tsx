@@ -23,11 +23,11 @@ export function Hero() {
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-8 text-cyan-50/72 sm:text-xl sm:leading-9">{brand.bio}</p>
           <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-            <Link href="/catalog" className="inline-flex items-center justify-center gap-2 rounded-full bg-cyan-300 px-7 py-4 text-sm font-semibold text-slate-950 shadow-[0_22px_54px_-38px_rgba(1,197,250,0.85)] transition hover:bg-cyan-200">
+            <Link href="/catalog" className="inline-flex items-center justify-center gap-2 rounded-full bg-cyan-300 px-7 py-4 text-sm font-semibold text-white shadow-[0_22px_54px_-38px_rgba(1,197,250,0.85)] transition hover:bg-cyan-200">
               Shop The Drop
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/catalog/jersey" className="inline-flex items-center justify-center rounded-full border border-cyan-400/20 bg-white/5 px-7 py-4 text-sm font-semibold text-cyan-100/78 transition hover:border-cyan-300/40 hover:bg-[#01c5fa]/10 hover:text-[#01c5fa]">
+            <Link href="/catalog/jersey" className="inline-flex items-center justify-center rounded-full border border-cyan-400/20 bg-white/5 px-7 py-4 text-sm font-semibold text-white transition hover:border-cyan-300/40 hover:bg-[#01c5fa]/10 hover:text-[#01c5fa]">
               Explore Jerseys
             </Link>
           </div>
