@@ -38,28 +38,7 @@ export function Hero() {
             ))}
           </div>
         </div>
-        <div className="relative">
-          <div className="grid items-center gap-5 sm:grid-cols-2">
-            <div className="rounded-[1.7rem] border border-cyan-400/16 bg-[#08112d] p-7 text-white shadow-[0_34px_90px_-58px_rgba(1,197,250,0.62)] sm:min-h-80 sm:rounded-[2rem]">
-              <p className="text-xs font-bold uppercase tracking-[0.32em] text-cyan-200/58">Drop 01</p>
-              <h2 className="mt-7 text-3xl font-bold leading-tight text-[#01c5fa]">World Cup 2026</h2>
-              <p className="mt-3 text-sm leading-7 text-cyan-50/68">Sharp supporter kits with premium detail, breathable body, and all-day comfort.</p>
-              <Link href="/catalog/jersey/world-cup-2026" className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-[#01c5fa] transition hover:text-cyan-100">
-                Shop Now
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="rounded-[1.7rem] border border-cyan-400/16 bg-[#08112d] p-7 shadow-[0_26px_80px_-58px_rgba(1,197,250,0.52)] sm:min-h-72 sm:translate-y-8 sm:rounded-[2rem]">
-              <p className="text-xs font-bold uppercase tracking-[0.32em] text-cyan-200/58">Drop 02</p>
-              <h2 className="mt-7 text-3xl font-bold leading-tight text-[#01aeea]">Flag Series</h2>
-              <p className="mt-4 text-sm leading-7 text-cyan-50/68">Statement fanwear and collectible edits styled for everyday movement.</p>
-              <Link href="/catalog/jersey/flags" className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-[#01aeea] transition hover:text-cyan-100">
-                Shop Collection
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
+
       </Container>
     </section>
   );
