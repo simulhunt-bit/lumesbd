@@ -21,17 +21,6 @@ export function Hero() {
             {brand.name}
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-8 text-cyan-50/72 sm:text-xl sm:leading-9">{brand.bio}</p>
-          <div className="mt-8 grid grid-cols-1 gap-4 text-center sm:mt-10 sm:grid-cols-2">
-            {[
-              ["Nationwide", "Bangladesh Delivery"],
-              ["Premium", "Quality & Comfort"],
-            ].map(([value, label]) => (
-              <div key={label} className="rounded-2xl border border-cyan-400/16 bg-[#08112d] p-4 shadow-[0_26px_80px_-58px_rgba(1,197,250,0.52)] backdrop-blur">
-                <p className="text-lg font-bold text-white">{value}</p>
-                <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-cyan-200/58 sm:text-xs sm:tracking-[0.18em]">{label}</p>
-              </div>
-            ))}
-          </div>
         </div>
 
       </Container>
