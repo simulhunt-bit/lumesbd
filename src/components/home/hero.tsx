@@ -7,8 +7,8 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden bg-[#060c24] py-10 sm:py-16 lg:py-20">
       <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(1,197,250,0.12)_0%,_rgba(6,12,36,0)_34%),radial-gradient(circle_at_82%_16%,_rgba(1,197,250,0.18),_transparent_30%)]" />
-      <Container className="relative grid items-center gap-10 lg:grid-cols-[0.98fr_1.02fr]">
-        <div className="max-w-2xl lg:order-2">
+      <Container className="relative grid items-center gap-10 lg:grid-cols-[1.02fr_0.98fr]">
+        <div className="max-w-2xl">
           <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-cyan-400/20 bg-white/5 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-cyan-100/72 shadow-[0_18px_46px_-34px_rgba(1,197,250,0.75)] backdrop-blur sm:px-4 sm:text-xs sm:tracking-[0.28em]">
             <Sparkles className="h-4 w-4" />
             Premium Fashionwear
