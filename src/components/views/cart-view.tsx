@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { ArrowRight, CreditCard, Package, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { ArrowRight, CreditCard, Package, Plus, ShoppingBag, Trash2, Ticket } from "lucide-react";
 import { useShop } from "@/context/shop-context";
 import { useAuth } from "@/context/auth-context";
 import { LocationSelects } from "@/components/shared/location-selects";
@@ -16,6 +16,7 @@ import {
   type CustomizationType,
   type JerseyCustomization,
 } from "@/lib/orders";
+import { getCoupon, validateCoupon, applyCoupon } from "@/lib/coupons";
 
 type CartItem = {
   id: string;
@@ -52,6 +53,9 @@ export function CartView() {
   });
   const [orderStatus, setOrderStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [orderMessage, setOrderMessage] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; amount: number } | null>(null);
+  const [couponMessage, setCouponMessage] = useState("");
   const cartProducts = cart
     .map((item) => {
       const product = getProducts().find((entry) => entry.slug === item.slug);
@@ -233,10 +237,46 @@ export function CartView() {
     }
   };
 
+  const applyCouponCode = () => {
+    setCouponMessage("");
+    
+    if (!couponCode.trim()) {
+      setCouponMessage("Please enter a coupon code.");
+      return;
+    }
+
+    const coupon = getCoupon(couponCode.trim());
+    if (!coupon) {
+      setCouponMessage("Invalid coupon code.");
+      return;
+    }
+
+    const validation = validateCoupon(coupon);
+    if (!validation.valid) {
+      setCouponMessage(validation.reason || "Invalid coupon code.");
+      return;
+    }
+
+    const discount = applyCoupon(coupon, total, deliveryCharge);
+    setAppliedDiscount({ code: couponCode.trim().toUpperCase(), amount: discount.discount });
+    setCouponMessage(`Coupon "${coupon.code.toUpperCase()}" applied successfully!`);
+    setCouponCode("");
+  };
+
+  const removeCoupon = () => {
+    setAppliedDiscount(null);
+    setCouponMessage("");
+    setCouponCode("");
+  };
+
   const submitOrder = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setOrderStatus("submitting");
     setOrderMessage("");
+
+    const finalDeliveryCharge = appliedDiscount
+      ? Math.max(0, deliveryCharge - appliedDiscount.amount)
+      : deliveryCharge;
 
     const order: CheckoutOrder = {
       orderId: "pending",
@@ -259,9 +299,11 @@ export function CartView() {
           (item.customizations?.reduce((sum, customization) => sum + customization.price, 0) ?? 0),
       })),
       subtotal: total,
-      deliveryCharge,
+      deliveryCharge: finalDeliveryCharge,
       vat: 0,
-      grandTotal,
+      grandTotal: total + finalDeliveryCharge,
+      discountCode: appliedDiscount?.code,
+      discountAmount: appliedDiscount?.amount,
       paymentMethod: COD_PAYMENT_METHOD,
       createdAt: "pending",
     };
@@ -640,9 +682,59 @@ export function CartView() {
                 {selectedDistrict ? formatPrice(deliveryCharge) : "Choose address"}
               </span>
             </div>
+            {appliedDiscount && (
+              <div className="mt-3 flex items-center justify-between gap-4 text-sm text-emerald-300">
+                <span className="flex items-center gap-2">
+                  <Ticket className="h-4 w-4" aria-hidden="true" />
+                  Discount ({appliedDiscount.code})
+                </span>
+                <span className="text-right font-medium text-emerald-300">-{formatPrice(appliedDiscount.amount)}</span>
+              </div>
+            )}
+            <div className="mt-3 flex flex-col gap-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  placeholder="Enter coupon code"
+                  disabled={appliedDiscount !== null}
+                  className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-400 outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                {appliedDiscount ? (
+                  <button
+                    type="button"
+                    onClick={removeCoupon}
+                    className="rounded-lg bg-rose-500/20 px-3 py-2 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/30"
+                  >
+                    Remove
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={applyCouponCode}
+                    disabled={!couponCode.trim() || orderStatus === "submitting"}
+                    className="rounded-lg bg-cyan-500/20 px-3 py-2 text-xs font-semibold text-cyan-200 transition enabled:hover:bg-cyan-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Apply
+                  </button>
+                )}
+              </div>
+              {couponMessage && (
+                <p
+                  className={`text-xs ${
+                    couponMessage.includes("successfully") ? "text-emerald-200" : "text-rose-200"
+                  }`}
+                >
+                  {couponMessage}
+                </p>
+              )}
+            </div>
             <div className="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
               <span>Total</span>
-              <span className="text-right font-medium text-white">{formatPrice(grandTotal)}</span>
+              <span className="text-right font-medium text-white">
+                {formatPrice(total + (appliedDiscount ? Math.max(0, deliveryCharge - appliedDiscount.amount) : deliveryCharge))}
+              </span>
             </div>
             <p className="mt-4 text-xs leading-5 text-slate-400">
               Delivery charge is calculated automatically from your selected items and delivery district.
@@ -650,7 +742,11 @@ export function CartView() {
             <div className="mt-6 border-t border-white/10 pt-6">
               <p className="flex items-center justify-between gap-4 text-sm text-slate-300">
                 <span>Grand total</span>
-                <strong className="text-2xl text-cyan-100">{formatPrice(grandTotal)}</strong>
+                <strong className="text-2xl text-cyan-100">
+                  {formatPrice(
+                    total + (appliedDiscount ? Math.max(0, deliveryCharge - appliedDiscount.amount) : deliveryCharge)
+                  )}
+                </strong>
               </p>
               <button
                 type="submit"
